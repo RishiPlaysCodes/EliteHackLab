@@ -50,10 +50,17 @@ const Database = require('better-sqlite3');
 const dbPath = path.join(__dirname, '..', 'db', 'lab.db');
 let db;
 try {
+  // Auto-create database if it doesn't exist (happens on fresh deploy)
+  const fs = require('fs');
+  if (!fs.existsSync(dbPath)) {
+    console.log('Database not found — running setup...');
+    require('child_process').execSync('node ' + path.join(__dirname, '..', 'db', 'setup.js'), { stdio: 'inherit' });
+  }
   db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
 } catch (err) {
-  console.error('Database not found. Run: npm run setup-db');
+  console.error('Database error:', err.message);
+  console.error('Run: npm run setup-db');
   process.exit(1);
 }
 

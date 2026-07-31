@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: elite-hack-lab
+    runtime: node
+    buildCommand: npm install && npm run setup-db
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    plan: free
+    autoDeploy: true
