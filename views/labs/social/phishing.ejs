@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-fish"></i> Phishing Detection</h1><div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Analyze the following emails and identify which ones are phishing attempts. Look for suspicious indicators like spoofed domains, urgency tactics, and malicious links.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-envelope"></i> Email Inbox</h2>
+      <% emails.forEach(function(email) { %>
+      <div class="code-block" style="margin-bottom:1rem; border-left:3px solid var(--primary-dim); padding:1rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+          <strong style="color:var(--primary);">From: <%= email.from %></strong>
+          <span style="color:var(--text-dim);">ID: #<%= email.id %></span>
+        </div>
+        <p style="margin:0.25rem 0;"><strong>Subject:</strong> <%= email.subject %></p>
+        <hr style="border-color:var(--primary-dim); margin:0.5rem 0;">
+        <p style="white-space:pre-wrap;"><%= email.body %></p>
+        <div style="margin-top:0.5rem;">
+          <button class="btn" onclick="markEmail('<%= email.id %>', true)" style="margin-right:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Phishing</button>
+          <button class="btn" onclick="markEmail('<%= email.id %>', false)"><i class="fas fa-check"></i> Legitimate</button>
+          <span id="emailResult_<%= email.id %>" style="margin-left:1rem;"></span>
+        </div>
+      </div>
+      <% }); %>
+      <div style="margin-top:1rem;">
+        <button class="btn" onclick="submitAllAnswers()"><i class="fas fa-paper-plane"></i> Submit All Answers</button>
+      </div>
+      <div id="phishResults" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('social-phishing','flagInput_phish','flagResult_phish'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_phish" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_phish" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    var answers = {};
+    function markEmail(id, isPhishing) {
+      answers[id] = isPhishing;
+      var el = document.getElementById('emailResult_' + id);
+      el.innerHTML = isPhishing ? '<span style="color:orange;">Marked as Phishing</span>' : '<span style="color:#00ff00;">Marked as Legitimate</span>';
+    }
+    async function submitAllAnswers() {
+      const resultsDiv = document.getElementById('phishResults');
+      try {
+        const res = await fetch('/api/labs/social/phishing', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ answers }) });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">Results: ' + data.correct + '/' + data.total + ' correct</h4>';
+        if (data.flag) html += '<p style="color:#00ff00">' + data.flag + '</p>';
+        if (data.details) { data.details.forEach(function(d) { html += '<p style="color:' + (d.correct ? '#00ff00' : '#ff4444') + '">Email #' + d.id + ': ' + (d.correct ? '✓' : '✗') + ' ' + d.explanation + '</p>'; }); }
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

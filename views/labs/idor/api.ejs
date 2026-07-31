@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>API IDOR - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🔓 API IDOR - User Profiles</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>Access admin user profiles and extract their API keys by iterating through user IDs.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> User Profile API</h2>
+      <div class="vulnerable-form">
+        <label>User ID (you are #2):</label>
+        <input type="number" id="userId" value="2" autocomplete="off">
+        <button onclick="getUser()" class="btn">Get Profile</button>
+      </div>
+      <div id="userResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">API: GET /labs/idor/api/user/{id}
+Try IDs: 1 (admin), 3, 4, 5 (superadmin with sensitive data)</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('idor-basic','flagInput_idor2','flagResult_idor2'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_idor2" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_idor2" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function getUser() {
+      const res = await fetch(`/labs/idor/api/user/${document.getElementById('userId').value}`);
+      document.getElementById('userResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-key"></i> XOR Key Reuse</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Two messages were encrypted with the same XOR key. Exploit key reuse to recover the original plaintext. Remember: C1 XOR C2 = P1 XOR P2.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> XOR Analysis</h2>
+      <div class="code-block">
+        <h4>Intercepted Ciphertexts (same key):</h4>
+        <pre>
+C1: 1c0111001f010100061a024b53535009181c
+C2: 686974207468652062756c6c277320657965
+Known: P2 = "hit the bull's eye"
+        </pre>
+      </div>
+      <div class="vulnerable-form" style="margin-top:1rem;">
+        <div style="margin-bottom:1rem;">
+          <label for="xorC1">Ciphertext 1 (hex):</label>
+          <input type="text" id="xorC1" value="1c0111001f010100061a024b53535009181c">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="xorC2">Ciphertext 2 (hex):</label>
+          <input type="text" id="xorC2" value="686974207468652062756c6c277320657965">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="xorKnown">Known Plaintext (for P2):</label>
+          <input type="text" id="xorKnown" value="hit the bull's eye">
+        </div>
+        <button class="btn" onclick="xorAttack()"><i class="fas fa-unlock"></i> Recover P1</button>
+      </div>
+      <div id="xorResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# XOR properties:
+# C1 = P1 XOR K
+# C2 = P2 XOR K
+# C1 XOR C2 = P1 XOR P2 (key cancels out!)
+# If you know P2: P1 = C1 XOR C2 XOR P2
+
+# Python: bytes(a^b for a,b in zip(c1,c2))
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('crypto-key-reuse','flagInput_xor','flagResult_xor'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_xor" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_xor" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function xorAttack() {
+      const c1 = document.getElementById('xorC1').value;
+      const c2 = document.getElementById('xorC2').value;
+      const known = document.getElementById('xorKnown').value;
+      const resultsDiv = document.getElementById('xorResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Computing XOR...</p>';
+      try {
+        const res = await fetch('/api/labs/crypto/key-reuse', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ c1, c2, knownPlaintext: known }) });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">Results:</h4>';
+        html += '<p>C1 XOR C2: <span style="font-family:monospace;">' + (data.xored || '') + '</span></p>';
+        html += '<p>Recovered P1: <span style="color:#00ff00;font-family:monospace;">' + (data.plaintext || '') + '</span></p>';
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

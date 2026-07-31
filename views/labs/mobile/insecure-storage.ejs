@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-database"></i> Insecure Storage</h1><div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>The Android app stores sensitive data insecurely on the device. Explore the filesystem to find credentials stored in SharedPreferences, SQLite databases, and plain text files.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Device Filesystem</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="storagePath">Path to explore:</label>
+          <input type="text" id="storagePath" value="/data/data/com.hacklab.app/" placeholder="/data/data/com.hacklab.app/">
+        </div>
+        <button class="btn" onclick="explorePath()"><i class="fas fa-folder-open"></i> Browse</button>
+      </div>
+      <div id="storageResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Common insecure storage locations:
+/data/data/com.hacklab.app/shared_prefs/
+/data/data/com.hacklab.app/databases/
+/data/data/com.hacklab.app/files/
+/sdcard/Android/data/com.hacklab.app/
+
+# Tools: adb shell, sqlite3
+# Check SharedPreferences XML files for stored passwords
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('mobile-insecure-storage','flagInput_storage','flagResult_storage'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_storage" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_storage" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function explorePath() {
+      const path = document.getElementById('storagePath').value;
+      const resultsDiv = document.getElementById('storageResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Browsing...</p>';
+      try {
+        const res = await fetch('/api/labs/mobile/insecure-storage', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ path }) });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">' + path + '</h4>';
+        html += '<pre style="color:var(--text);white-space:pre-wrap;">' + (data.content || data.listing || 'Empty') + '</pre>';
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

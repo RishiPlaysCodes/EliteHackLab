@@ -1,0 +1,6 @@
+node_modules/
+db/lab.db
+public/uploads/*
+!public/uploads/.gitkeep
+.env
+*.log

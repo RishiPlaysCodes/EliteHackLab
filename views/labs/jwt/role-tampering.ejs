@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JWT Role Tampering - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🎫 JWT Role Tampering</h1><div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>Access the admin panel by modifying your JWT token's role claim. Use any technique (none algorithm, crack secret, etc.)</p>
+      <p><strong>Token:</strong></p><div class="code-block" style="word-break:break-all;"><%= token %></div>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Admin Panel</h2>
+      <div class="vulnerable-form">
+        <label>Token for admin access:</label>
+        <textarea id="adminToken" rows="2"><%= token %></textarea>
+        <button onclick="accessAdmin()" class="btn btn-danger">Access Admin Panel</button>
+      </div>
+      <div id="adminResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('jwt-none','flagInput_jwtR','flagResult_jwtR'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_jwtR" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_jwtR" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function accessAdmin() {
+      const token = document.getElementById('adminToken').value.trim();
+      const res = await fetch('/labs/jwt/role-tampering/admin?token='+encodeURIComponent(token));
+      document.getElementById('adminResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

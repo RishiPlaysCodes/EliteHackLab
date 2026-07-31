@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-exchange-alt"></i> ARP Spoofing</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Understand ARP spoofing attacks and how they enable traffic interception on local networks. Simulate an ARP poisoning attack to redirect traffic.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-project-diagram"></i> How ARP Works</h2>
+      <div class="code-block"><pre>
+ARP (Address Resolution Protocol):
+- Maps IP addresses to MAC addresses on local network
+- Stateless protocol - no authentication
+- Any device can send ARP replies (even unsolicited)
+
+Normal ARP Table:
+┌─────────────────┬───────────────────┐
+│   IP Address    │   MAC Address     │
+├─────────────────┼───────────────────┤
+│ 192.168.1.1     │ AA:BB:CC:DD:EE:01 │ (Gateway)
+│ 192.168.1.100   │ AA:BB:CC:DD:EE:02 │ (Victim)
+│ 192.168.1.200   │ AA:BB:CC:DD:EE:03 │ (Attacker)
+└─────────────────┴───────────────────┘
+
+Poisoned ARP Table (on Victim):
+┌─────────────────┬───────────────────┐
+│   IP Address    │   MAC Address     │
+├─────────────────┼───────────────────┤
+│ 192.168.1.1     │ AA:BB:CC:DD:EE:03 │ ← Attacker's MAC!
+│ 192.168.1.200   │ AA:BB:CC:DD:EE:03 │ (Attacker)
+└─────────────────┴───────────────────┘
+      </pre></div>
+    </div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> ARP Spoof Simulation</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="victimIp">Victim IP:</label>
+          <input type="text" id="victimIp" placeholder="192.168.1.100" value="192.168.1.100">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="gatewayIp">Gateway IP:</label>
+          <input type="text" id="gatewayIp" placeholder="192.168.1.1" value="192.168.1.1">
+        </div>
+        <button class="btn" onclick="startArpSpoof()"><i class="fas fa-play"></i> Start ARP Spoofing</button>
+      </div>
+      <div id="arpResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# ARP spoofing tools:
+arpspoof -i eth0 -t 192.168.1.100 192.168.1.1
+bettercap -iface eth0 -eval "set arp.spoof.targets 192.168.1.100; arp.spoof on"
+
+# Detection:
+arpwatch - monitors ARP activity
+arping - detect duplicate IPs
+
+# Prevention:
+- Static ARP entries
+- Dynamic ARP Inspection (DAI)
+- 802.1X port authentication
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('network-arp','flagInput_arp','flagResult_arp'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_arp" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_arp" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function startArpSpoof() {
+      const victim = document.getElementById('victimIp').value;
+      const gateway = document.getElementById('gatewayIp').value;
+      const resultsDiv = document.getElementById('arpResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Sending spoofed ARP replies...</p>';
+      try {
+        const res = await fetch('/api/labs/network/arp', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ victim, gateway }) });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">ARP Spoofing Results</h4>';
+        html += '<p style="color:#00ff00">' + data.message + '</p>';
+        if (data.packets) { data.packets.forEach(function(p) { html += '<p style="font-family:monospace;color:var(--text-dim);margin:0.2rem 0;">' + p + '</p>'; }); }
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

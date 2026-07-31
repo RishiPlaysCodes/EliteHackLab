@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Weak Password Reset - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🔐 Weak Password Reset</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The password reset token is predictable (based on timestamp). Generate a token, predict the next one, or find the exposed debug info to reset anyone's password.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Password Reset</h2>
+      <div class="vulnerable-form">
+        <label>Email:</label><input type="text" id="resetEmail" value="admin@elitehacklab.local" autocomplete="off">
+        <button onclick="requestReset()" class="btn">Request Reset</button>
+      </div>
+      <div id="resetResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">Vulnerability: Token = Date.now().toString(36)
+This is predictable! If you know when the request was made, you can compute the token.</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('brute-force','flagInput_wr','flagResult_wr'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_wr" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_wr" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function requestReset() {
+      const res = await fetch('/labs/auth/weak-reset/request', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:document.getElementById('resetEmail').value}) });
+      document.getElementById('resetResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

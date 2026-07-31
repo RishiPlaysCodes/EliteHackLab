@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-puzzle-piece"></i> Padding Oracle Attack</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Exploit the padding oracle vulnerability to decrypt the ciphertext without knowing the key. The server reveals whether decryption produces valid PKCS#7 padding.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Padding Oracle</h2>
+      <div class="code-block">
+        <h4>Encrypted Token:</h4>
+        <pre>
+IV:  a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6
+CT:  f8e7d6c5b4a39281706f5e4d3c2b1a09
+     1f2e3d4c5b6a79880011223344556677
+        </pre>
+      </div>
+      <div class="vulnerable-form" style="margin-top:1rem;">
+        <div style="margin-bottom:1rem;">
+          <label for="oracleIV">IV (hex):</label>
+          <input type="text" id="oracleIV" value="a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="oracleCT">Ciphertext (hex):</label>
+          <input type="text" id="oracleCT" value="f8e7d6c5b4a39281706f5e4d3c2b1a091f2e3d4c5b6a79880011223344556677">
+        </div>
+        <button class="btn" onclick="queryOracle()"><i class="fas fa-question"></i> Query Oracle</button>
+      </div>
+      <div id="oracleResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Padding Oracle Attack steps:
+# 1. Modify last byte of IV/previous block
+# 2. Send to oracle, check if padding is valid
+# 3. When valid: XOR gives you intermediate byte
+# 4. Recover plaintext: intermediate XOR original IV
+
+# PKCS#7 padding: last N bytes all equal N
+# \x01, \x02\x02, \x03\x03\x03, etc.
+
+# Tools: padbuster, padding-oracle-attacker
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('crypto-padding-oracle','flagInput_padding','flagResult_padding'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_padding" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_padding" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function queryOracle() {
+      const iv = document.getElementById('oracleIV').value;
+      const ciphertext = document.getElementById('oracleCT').value;
+      const resultsDiv = document.getElementById('oracleResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Querying oracle...</p>';
+      try {
+        const res = await fetch('/api/labs/crypto/padding-oracle', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ iv, ciphertext }) });
+        const data = await res.json();
+        if (data.validPadding) {
+          resultsDiv.innerHTML = '<p style="color:#00ff00"><i class="fas fa-check-circle"></i> Valid padding! The decrypted data has correct PKCS#7 padding.</p>';
+        } else {
+          resultsDiv.innerHTML = '<p style="color:#ff4444"><i class="fas fa-times-circle"></i> Invalid padding! Decryption produced incorrect padding.</p>';
+        }
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

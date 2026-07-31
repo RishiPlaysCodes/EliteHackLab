@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>LFI - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>📂 Local File Inclusion (LFI)</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The page parameter is used to include a template file. Manipulate it to include system files.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Page Navigation</h2>
+      <div class="lab-nav">
+        <a href="?page=home" class="<%= page==='home'?'active':'' %>">Home</a>
+        <a href="?page=about" class="<%= page==='about'?'active':'' %>">About</a>
+        <a href="?page=contact" class="<%= page==='contact'?'active':'' %>">Contact</a>
+        <a href="?page=../../../../etc/passwd" style="color:var(--neon-red);">Try LFI</a>
+      </div>
+      <div class="result-box">
+        <p style="color:var(--text-secondary); font-size:0.8rem;">Loading page: <code><%= page %></code></p>
+        <%- content %>
+      </div>
+      <% if (lfiDetected) { %><div class="success-box"><i class="fas fa-check"></i> LFI Detected! Check the output for sensitive data and the flag.</div><% } %>
+      <div class="code-block">URL: /labs/path-traversal/lfi?page=../../../../etc/passwd
+     /labs/path-traversal/lfi?page=../../../../proc/self/environ
+     /labs/path-traversal/lfi?page=../../../../app/config.js</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('path-traversal','flagInput_lfi','flagResult_lfi'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_lfi" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_lfi" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

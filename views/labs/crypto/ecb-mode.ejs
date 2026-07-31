@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-cube"></i> ECB Mode Oracle</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>This encryption oracle uses AES-ECB mode. Exploit the deterministic nature of ECB encryption to decrypt the hidden secret one byte at a time by crafting chosen plaintexts.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Encryption Oracle</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="ecbInput">Plaintext to Encrypt (hex or ASCII):</label>
+          <input type="text" id="ecbInput" placeholder="AAAAAAAAAAAAAAAA" value="AAAAAAAAAAAAAAAA">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label><input type="checkbox" id="hexMode"> Hex input mode</label>
+        </div>
+        <button class="btn" onclick="encryptEcb()"><i class="fas fa-lock"></i> Encrypt</button>
+      </div>
+      <div id="ecbResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# ECB mode encrypts each 16-byte block independently
+# Same plaintext block → Same ciphertext block
+
+# Attack strategy:
+# 1. Send 15 bytes of 'A' → Oracle encrypts: AAAAAAAAAAAAAAA + secret[0]
+# 2. Try all 256 values for the last byte
+# 3. Match the ciphertext block to find secret[0]
+# 4. Send 14 bytes of 'A' → AAAAAAAAAAAAAA + secret[0] + secret[1]
+# 5. Repeat until full secret is recovered
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('crypto-ecb','flagInput_ecb','flagResult_ecb'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_ecb" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_ecb" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function encryptEcb() {
+      const input = document.getElementById('ecbInput').value;
+      const hexMode = document.getElementById('hexMode').checked;
+      const resultsDiv = document.getElementById('ecbResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Encrypting...</p>';
+      try {
+        const res = await fetch('/api/labs/crypto/ecb-mode', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ plaintext: input, hexMode }) });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">Ciphertext (hex):</h4>';
+        html += '<p style="font-family:monospace;word-break:break-all;color:var(--text);">' + data.ciphertext + '</p>';
+        html += '<p style="color:var(--text-dim);font-size:0.9rem;">Block size: 16 bytes | Blocks: ' + (data.ciphertext.length / 32) + '</p>';
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

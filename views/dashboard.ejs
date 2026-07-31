@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EliteHackLab - Ultimate Cybersecurity Practice Platform</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  
+  <!-- Navigation -->
+  <nav class="main-nav">
+    <div class="nav-brand">
+      <span class="brand-icon">💀</span>
+      <span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="active"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="/scoreboard"><i class="fas fa-trophy"></i> Scoreboard</a>
+      <a href="#categories"><i class="fas fa-flask"></i> Labs</a>
+    </div>
+    <div class="nav-stats">
+      <span class="stat-badge"><i class="fas fa-flag"></i> <%= totalFlags %> Challenges</span>
+      <span class="stat-badge success"><i class="fas fa-check"></i> <%= totalCompleted %> Solved</span>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">elite@hacklab:~$</span>
+        </div>
+        <div class="terminal-body">
+          <p class="typing-effect">
+            <span class="prompt">$</span> Welcome to <span class="highlight">EliteHackLab</span> v1.0
+          </p>
+          <p><span class="prompt">$</span> The Ultimate Cybersecurity Training Platform</p>
+          <p><span class="prompt">$</span> 40+ Vulnerable Labs | 11 Categories | CTF Flags</p>
+          <p><span class="prompt">$</span> From Beginner to Elite Pro Max+++</p>
+          <p class="blink"><span class="prompt">$</span> <span class="cursor">_</span></p>
+        </div>
+      </div>
+      <h1 class="glitch" data-text="ELITE HACK LAB">ELITE HACK LAB</h1>
+      <p class="hero-subtitle">Train Like a Pro. Think Like an Attacker. Defend Like an Elite.</p>
+      <div class="hero-badges">
+        <span class="badge"><i class="fas fa-skull-crossbones"></i> 40+ Labs</span>
+        <span class="badge"><i class="fas fa-layer-group"></i> 11 Categories</span>
+        <span class="badge"><i class="fas fa-flag"></i> CTF Flags</span>
+        <span class="badge"><i class="fas fa-chart-line"></i> Progress Tracking</span>
+        <span class="badge"><i class="fas fa-graduation-cap"></i> Beginner to Elite</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Bar -->
+  <section class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-number" id="labCount"><%= totalLabs %>+</div>
+      <div class="stat-label">Vulnerability Labs</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number"><%= totalFlags %></div>
+      <div class="stat-label">CTF Flags</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">11</div>
+      <div class="stat-label">Attack Categories</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">5</div>
+      <div class="stat-label">Difficulty Levels</div>
+    </div>
+  </section>
+
+  <!-- Difficulty Legend -->
+  <section class="difficulty-legend">
+    <h3><i class="fas fa-signal"></i> Difficulty Levels</h3>
+    <div class="levels">
+      <span class="level easy"><i class="fas fa-seedling"></i> Easy</span>
+      <span class="level medium"><i class="fas fa-fire"></i> Medium</span>
+      <span class="level hard"><i class="fas fa-skull"></i> Hard</span>
+      <span class="level elite"><i class="fas fa-crown"></i> Elite</span>
+      <span class="level impossible"><i class="fas fa-radiation"></i> Impossible</span>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="categories" id="categories">
+    <h2 class="section-title"><i class="fas fa-crosshairs"></i> Attack Categories</h2>
+    
+    <div class="category-grid">
+      <% categories.forEach(function(cat) { %>
+        <div class="category-card" style="--card-color: <%= cat.color %>">
+          <div class="category-header">
+            <span class="category-icon"><%= cat.icon %></span>
+            <h3><%= cat.name %></h3>
+          </div>
+          <p class="category-desc"><%= cat.description %></p>
+          <div class="lab-list">
+            <% cat.labs.forEach(function(lab) { %>
+              <a href="<%= lab.path %>" class="lab-link">
+                <span class="lab-name"><i class="fas fa-terminal"></i> <%= lab.name %></span>
+                <span class="lab-meta">
+                  <span class="lab-difficulty <%= lab.difficulty.toLowerCase().split('-')[0] %>"><%= lab.difficulty %></span>
+                  <span class="lab-count"><%= lab.count %> labs</span>
+                </span>
+              </a>
+            <% }); %>
+          </div>
+          <div class="category-footer">
+            <span class="total-labs"><%= cat.labs.reduce(function(a,b){ return a + b.count; }, 0) %> Total Challenges</span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Quick Start Guide -->
+  <section class="quick-start">
+    <h2 class="section-title"><i class="fas fa-rocket"></i> Quick Start</h2>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-number">01</div>
+        <h4>Choose a Category</h4>
+        <p>Pick any vulnerability category above based on your skill level and interest.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <h4>Read the Briefing</h4>
+        <p>Each lab has instructions, hints, and theory explaining the vulnerability.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <h4>Exploit the Vuln</h4>
+        <p>Use your skills to find and exploit the intentional vulnerability.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">04</div>
+        <h4>Capture the Flag</h4>
+        <p>Find the hidden FLAG{} and submit it to earn points!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools Recommended -->
+  <section class="tools-section">
+    <h2 class="section-title"><i class="fas fa-wrench"></i> Recommended Tools</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <h4>🌐 Burp Suite</h4>
+        <p>Web proxy for intercepting/modifying HTTP requests</p>
+      </div>
+      <div class="tool-card">
+        <h4>🐍 Python</h4>
+        <p>Scripting exploits, automation, and custom tools</p>
+      </div>
+      <div class="tool-card">
+        <h4>🔧 cURL</h4>
+        <p>Command-line HTTP client for testing APIs</p>
+      </div>
+      <div class="tool-card">
+        <h4>💉 sqlmap</h4>
+        <p>Automated SQL injection detection and exploitation</p>
+      </div>
+      <div class="tool-card">
+        <h4>🔓 John/Hashcat</h4>
+        <p>Password cracking and hash analysis</p>
+      </div>
+      <div class="tool-card">
+        <h4>📡 Wireshark</h4>
+        <p>Network packet capture and analysis</p>
+      </div>
+      <div class="tool-card">
+        <h4>🗡️ Metasploit</h4>
+        <p>Penetration testing framework</p>
+      </div>
+      <div class="tool-card">
+        <h4>🖥️ Browser DevTools</h4>
+        <p>Built-in browser debugging and network analysis</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="footer-content">
+      <p class="warning">⚠️ FOR EDUCATIONAL & AUTHORIZED TESTING PURPOSES ONLY ⚠️</p>
+      <p>EliteHackLab - Self-hosted vulnerable-by-design practice environment</p>
+      <p>Never use these techniques against systems without explicit authorization.</p>
+      <div class="footer-links">
+        <a href="https://owasp.org/Top10/" target="_blank">OWASP Top 10</a>
+        <a href="https://cwe.mitre.org/" target="_blank">CWE/MITRE</a>
+        <a href="https://attack.mitre.org/" target="_blank">MITRE ATT&CK</a>
+        <a href="https://nvd.nist.gov/" target="_blank">NVD</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Flag Submission Modal -->
+  <div class="modal" id="flagModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeFlagModal()">&times;</span>
+      <h3><i class="fas fa-flag"></i> Submit Flag</h3>
+      <form id="flagForm" onsubmit="submitFlag(event)">
+        <input type="text" id="flagInput" placeholder="FLAG{...}" autocomplete="off">
+        <input type="hidden" id="labIdInput">
+        <button type="submit">Submit</button>
+      </form>
+      <div id="flagResult"></div>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

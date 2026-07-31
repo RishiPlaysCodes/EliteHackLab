@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reflected XSS - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/xss"><i class="fas fa-flask"></i> XSS Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/xss">XSS</a> / Reflected</div>
+      <h1>🎭 Reflected XSS</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-easy">Easy</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 10 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The search input is reflected directly in the page without sanitization. Execute JavaScript to prove XSS. Make an alert box appear with the text "XSS".</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-search"></i> Search</h2>
+      <form method="GET" class="vulnerable-form">
+        <label>Search:</label>
+        <input type="text" name="q" value="<%= search %>" placeholder="Type something..." autocomplete="off">
+        <button type="submit"><i class="fas fa-search"></i> Search</button>
+      </form>
+
+      <% if (search) { %>
+        <div class="result-box">
+          <p>Search results for: <strong><%- search %></strong></p>
+          <p style="color:var(--text-secondary);">No results found.</p>
+        </div>
+      <% } %>
+
+      <div class="code-block">
+Payloads to try:
+&lt;script&gt;alert('XSS')&lt;/script&gt;
+&lt;img src=x onerror=alert('XSS')&gt;
+&lt;svg onload=alert('XSS')&gt;
+&lt;body onload=alert('XSS')&gt;
+"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+      </div>
+      <div class="hint-box"><i class="fas fa-lightbulb"></i> The flag is: FLAG{xss_reflected_pwned} - submit it after successfully executing XSS</div>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('xss-reflected', 'flagInput_xss_r', 'flagResult_xss_r'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_xss_r" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_xss_r" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

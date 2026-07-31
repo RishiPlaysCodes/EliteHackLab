@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-wave-square"></i> Packet Analysis</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Analyze the captured network traffic below. Find credentials transmitted in plaintext protocols. The password of the admin user is the flag.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Packet Capture Data</h2>
+      <div class="code-block">
+        <pre style="max-height:400px; overflow-y:auto;">
+Frame 1: 74 bytes on wire
+Ethernet II, Src: 00:0c:29:a1:b2:c3, Dst: 00:0c:29:d4:e5:f6
+Internet Protocol, Src: 192.168.1.100, Dst: 192.168.1.50
+TCP, Src Port: 49152, Dst Port: 21 [SYN]
+
+Frame 2: 74 bytes on wire
+TCP, Src Port: 21, Dst Port: 49152 [SYN, ACK]
+
+Frame 3: 66 bytes on wire
+TCP, Src Port: 49152, Dst Port: 21 [ACK]
+
+Frame 4: 87 bytes on wire
+FTP Response: 220 Welcome to HackLab FTP Server
+
+Frame 5: 78 bytes on wire
+FTP Request: USER admin
+
+Frame 6: 85 bytes on wire
+FTP Response: 331 Password required for admin
+
+Frame 7: 82 bytes on wire
+FTP Request: PASS s3cr3t_n3tw0rk_fl4g
+
+Frame 8: 79 bytes on wire
+FTP Response: 230 Login successful
+
+Frame 9: 71 bytes on wire
+FTP Request: LIST
+
+Frame 10: 156 bytes on wire
+FTP Response: 150 Opening ASCII mode data connection
+-rw-r--r-- 1 admin admin 1024 Jan 15 secret_docs.zip
+-rw-r--r-- 1 admin admin 512  Jan 15 credentials.txt
+226 Directory send OK
+
+Frame 11: 98 bytes on wire
+Ethernet II, Src: 00:0c:29:a1:b2:c3, Dst: 00:0c:29:d4:e5:f6
+Internet Protocol, Src: 192.168.1.100, Dst: 192.168.1.50
+TCP, Src Port: 49200, Dst Port: 80
+
+Frame 12: 245 bytes on wire
+HTTP GET /admin/dashboard HTTP/1.1
+Host: 192.168.1.50
+Authorization: Basic YWRtaW46czNjcjN0X24zdHcwcmtfZmw0Zw==
+        </pre>
+      </div>
+      <div class="vulnerable-form" style="margin-top:1rem;">
+        <label for="credAnswer">What is the admin password found in the capture?</label>
+        <input type="text" id="credAnswer" placeholder="Enter the password you found...">
+        <button class="btn" onclick="checkAnswer()" style="margin-top:0.5rem;"><i class="fas fa-check"></i> Verify</button>
+      </div>
+      <div id="answerResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Look for plaintext protocols: FTP, HTTP, Telnet
+# FTP transmits credentials in cleartext
+# HTTP Basic Auth uses Base64 encoding (not encryption!)
+# Decode Base64: echo "YWRtaW46..." | base64 -d
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('network-packet-analysis','flagInput_packet','flagResult_packet'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_packet" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_packet" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    function checkAnswer() {
+      const answer = document.getElementById('credAnswer').value;
+      const resultDiv = document.getElementById('answerResult');
+      if (answer === 's3cr3t_n3tw0rk_fl4g') {
+        resultDiv.innerHTML = '<p style="color:#00ff00"><i class="fas fa-check-circle"></i> Correct! The FTP password was transmitted in plaintext. Flag: FLAG{s3cr3t_n3tw0rk_fl4g}</p>';
+      } else {
+        resultDiv.innerHTML = '<p style="color:#ff4444"><i class="fas fa-times-circle"></i> Incorrect. Look carefully at the FTP PASS command in the packet capture.</p>';
+      }
+      resultDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

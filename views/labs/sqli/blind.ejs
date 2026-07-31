@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blind SQL Injection - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/sqli"><i class="fas fa-flask"></i> SQLi Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/sqli">SQL Injection</a> / Blind</div>
+      <h1>💉 Blind SQL Injection</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-hard">Hard</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 25 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>This endpoint only returns true/false. No error messages, no data output. Extract the admin password character by character using boolean-based or time-based blind injection.</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Boolean-Based Blind</h2>
+      <div class="vulnerable-form">
+        <label>Product ID Check (returns exists: true/false):</label>
+        <input type="text" id="blindInput" placeholder="1" autocomplete="off">
+        <button onclick="testBlind()" class="btn">Check</button>
+        <div id="blindResult" class="result-box" style="margin-top:1rem;"></div>
+      </div>
+      <div class="code-block">
+API: GET /labs/sqli/blind/check?id=YOUR_INPUT
+
+Examples:
+- Normal: ?id=1 → {"exists": true}
+- Injection: ?id=1 AND (SELECT length(password) FROM users WHERE username='admin')=8 → true/false
+- Extract char: ?id=1 AND (SELECT substr(password,1,1) FROM users WHERE username='admin')='a' → true/false
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-clock"></i> Time-Based Blind</h2>
+      <div class="vulnerable-form">
+        <label>Time-based endpoint (observe response time):</label>
+        <input type="text" id="timeInput" placeholder="1" autocomplete="off">
+        <button onclick="testTimeBased()" class="btn">Test</button>
+        <div id="timeResult" class="result-box" style="margin-top:1rem;"></div>
+      </div>
+      <div class="code-block">
+API: GET /labs/sqli/blind/time?id=YOUR_INPUT
+
+If condition is true → response delayed by 2 seconds
+If condition is false → immediate response
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-lightbulb"></i> Hints</h2>
+      <ul>
+        <li>Admin password length: try <code>1 AND (SELECT length(password) FROM users WHERE username='admin')>5</code></li>
+        <li>Extract characters one by one using substr()</li>
+        <li>Automate with a script for efficiency</li>
+        <li>The flag format is: FLAG{blind_sqli_master}</li>
+      </ul>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('sqli-blind', 'flagInput_blind', 'flagResult_blind'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_blind" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_blind" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    async function testBlind() {
+      const id = document.getElementById('blindInput').value;
+      const res = await fetch(`/labs/sqli/blind/check?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      document.getElementById('blindResult').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+    async function testTimeBased() {
+      const id = document.getElementById('timeInput').value;
+      const start = Date.now();
+      const res = await fetch(`/labs/sqli/blind/time?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      const elapsed = Date.now() - start;
+      document.getElementById('timeResult').innerHTML = `<pre>Response time: ${elapsed}ms\n${JSON.stringify(data, null, 2)}</pre>`;
+    }
+  </script>
+</body>
+</html>

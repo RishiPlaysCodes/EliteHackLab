@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scoreboard - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand">
+      <span class="brand-icon">💀</span>
+      <span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span>
+    </div>
+    <div class="nav-links">
+      <a href="/"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="/scoreboard" class="active"><i class="fas fa-trophy"></i> Scoreboard</a>
+    </div>
+  </nav>
+
+  <div class="lab-container">
+    <h1 style="text-align:center; margin-bottom: 2rem;"><i class="fas fa-trophy" style="color: var(--neon-yellow);"></i> Scoreboard</h1>
+    
+    <div class="lab-section">
+      <% if (scores.length === 0) { %>
+        <p style="text-align:center; color: var(--text-secondary);">No flags captured yet. Start hacking!</p>
+      <% } else { %>
+        <table class="scoreboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Hacker</th>
+              <th>Labs Completed</th>
+              <th>Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% scores.forEach(function(s, i) { %>
+              <tr>
+                <td><%= i + 1 %> <%= i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '' %></td>
+                <td><%= s.username %></td>
+                <td><%= s.labs_completed %></td>
+                <td style="color: var(--neon-green); font-weight: bold;"><%= s.total_points %> pts</td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

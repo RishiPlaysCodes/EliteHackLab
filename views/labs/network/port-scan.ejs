@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-radar"></i> Port Scanner Simulation</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Use the simulated port scanner to discover open ports and running services on target hosts. Identify all services to find the hidden flag.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Port Scanner</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="targetIp">Target IP Address:</label>
+          <input type="text" id="targetIp" placeholder="192.168.1.1" value="10.0.0.5">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="scanType">Scan Type:</label>
+          <select id="scanType">
+            <option value="quick">Quick Scan (Top 100 ports)</option>
+            <option value="service">Service Detection (-sV)</option>
+            <option value="aggressive">Aggressive Scan (-A)</option>
+          </select>
+        </div>
+        <button class="btn" onclick="runScan()"><i class="fas fa-play"></i> Run Scan</button>
+      </div>
+      <div id="scanResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Nmap scan techniques:
+nmap -sT 10.0.0.5          # TCP connect scan
+nmap -sV 10.0.0.5          # Service version detection
+nmap -A 10.0.0.5           # Aggressive scan (OS, version, scripts)
+nmap -p- 10.0.0.5          # Scan all 65535 ports
+
+# Try scanning different targets to find the flag service
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('network-port-scan','flagInput_portscan','flagResult_portscan'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_portscan" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_portscan" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function runScan() {
+      const target = document.getElementById('targetIp').value;
+      const scanType = document.getElementById('scanType').value;
+      const resultsDiv = document.getElementById('scanResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Scanning ' + target + '...</p>';
+      try {
+        const res = await fetch('/api/labs/network/port-scan', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ target, scanType })
+        });
+        const data = await res.json();
+        if (data.results) {
+          let html = '<h4 style="color:var(--primary)">Scan Results for ' + target + '</h4>';
+          html += '<table style="width:100%;border-collapse:collapse;margin-top:0.5rem;">';
+          html += '<tr style="border-bottom:1px solid var(--primary-dim)"><th style="text-align:left;padding:0.5rem;">PORT</th><th style="text-align:left;padding:0.5rem;">STATE</th><th style="text-align:left;padding:0.5rem;">SERVICE</th><th style="text-align:left;padding:0.5rem;">VERSION</th></tr>';
+          data.results.forEach(function(p) {
+            html += '<tr><td style="padding:0.5rem;color:var(--text)">' + p.port + '</td><td style="padding:0.5rem;color:#00ff00">' + p.state + '</td><td style="padding:0.5rem;">' + p.service + '</td><td style="padding:0.5rem;color:var(--text-dim)">' + (p.version||'') + '</td></tr>';
+          });
+          html += '</table>';
+          resultsDiv.innerHTML = html;
+        } else {
+          resultsDiv.innerHTML = '<p style="color:#ff4444">' + (data.error || 'No results') + '</p>';
+        }
+      } catch(e) {
+        resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>';
+      }
+    }
+  </script>
+</body>
+</html>

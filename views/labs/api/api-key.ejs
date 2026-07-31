@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-key"></i> API Key Exposure</h1><div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>The application accidentally exposes API keys in client-side JavaScript and response headers. Find the admin API key to access the restricted endpoint.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> API Explorer</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="apiEndpoint">Endpoint:</label>
+          <select id="apiEndpoint">
+            <option value="/api/public/info">GET /api/public/info</option>
+            <option value="/api/docs">GET /api/docs</option>
+            <option value="/api/admin/flag">GET /api/admin/flag (requires API key)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="apiKeyInput">X-API-Key Header:</label>
+          <input type="text" id="apiKeyInput" placeholder="Enter API key">
+        </div>
+        <button class="btn" onclick="callApi()"><i class="fas fa-paper-plane"></i> Send Request</button>
+      </div>
+      <div id="apiKeyResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Places to look for exposed API keys:
+# - JavaScript source files (view-source:)
+# - Response headers (X-Debug, X-API-Key)
+# - HTML comments
+# - /api/docs endpoint
+# - .env files exposed via directory traversal
+
+# Check the page source and /api/docs response carefully
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('api-key-exposure','flagInput_apikey','flagResult_apikey'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_apikey" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_apikey" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <!-- TODO: Remove before production -->
+  <!-- ADMIN_API_KEY=sk_live_hacklab_admin_9x8f7e6d -->
+  <script src="/js/main.js"></script>
+  <script>
+    async function callApi() {
+      const endpoint = document.getElementById('apiEndpoint').value;
+      const apiKey = document.getElementById('apiKeyInput').value;
+      const resultsDiv = document.getElementById('apiKeyResults');
+      const headers = {'Content-Type':'application/json'};
+      if (apiKey) headers['X-API-Key'] = apiKey;
+      try {
+        const res = await fetch('/api/labs/api/api-key?endpoint=' + encodeURIComponent(endpoint), { headers });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">Response:</h4>';
+        html += '<pre style="color:var(--text);white-space:pre-wrap;">' + JSON.stringify(data, null, 2) + '</pre>';
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

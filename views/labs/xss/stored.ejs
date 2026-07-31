@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stored XSS - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/xss"><i class="fas fa-flask"></i> XSS Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/xss">XSS</a> / Stored</div>
+      <h1>🎭 Stored XSS</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-medium">Medium</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 20 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>Comments are stored in the database and displayed to all users without sanitization. Post a comment with XSS payload that executes for everyone who views this page.</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-comment"></i> Comment Section</h2>
+      <form method="POST" action="/labs/xss/stored/comment" class="vulnerable-form">
+        <label>Post a comment:</label>
+        <textarea name="content" placeholder="Write your comment here..." rows="3"></textarea>
+        <button type="submit"><i class="fas fa-paper-plane"></i> Post Comment</button>
+      </form>
+
+      <div style="margin-top: 1.5rem;">
+        <h4 style="color: var(--neon-blue); margin-bottom: 0.8rem;">Comments (<%= comments.length %>):</h4>
+        <% if (comments.length === 0) { %>
+          <p style="color:var(--text-secondary);">No comments yet. Be the first!</p>
+        <% } %>
+        <% comments.forEach(function(c) { %>
+          <div style="background:var(--bg-terminal); padding:0.8rem; border-radius:6px; margin-bottom:0.5rem; border-left:3px solid var(--neon-green);">
+            <small style="color:var(--text-secondary);">User #<%= c.user_id %> | <%= c.created_at %></small>
+            <p style="margin-top:0.3rem;"><%- c.content %></p>
+          </div>
+        <% }); %>
+      </div>
+
+      <form method="POST" action="/labs/xss/stored/reset" style="margin-top:1rem;">
+        <button type="submit" class="btn-danger" style="padding:0.4rem 1rem; font-size:0.8rem; border:none; border-radius:4px; cursor:pointer;">🗑️ Reset Comments</button>
+      </form>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('xss-stored', 'flagInput_xss_s', 'flagResult_xss_s'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_xss_s" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_xss_s" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/prototype-pollution"><i class="fas fa-flask"></i> PP Labs</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>⚗️ Basic Prototype Pollution</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span><span class="lab-tag points"><i class="fas fa-star"></i> 40 pts</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The server uses an unsafe deep merge function. Send a JSON payload that pollutes Object.prototype via __proto__.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Object Merge API</h2>
+      <div class="vulnerable-form">
+        <label>JSON to merge into config:</label>
+        <textarea id="ppInput" rows="4">{"theme":"hacker","__proto__":{"isAdmin":true}}</textarea>
+        <button onclick="submitPP()" class="btn">Merge</button>
+      </div>
+      <div id="ppResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">Payloads:
+{"__proto__":{"isAdmin":true}}
+{"constructor":{"prototype":{"isAdmin":true}}}
+{"__proto__":{"role":"admin","authenticated":true}}</div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('prototype-pollution','flagInput_pp','flagResult_pp'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_pp" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_pp" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function submitPP() {
+      const res = await fetch('/labs/prototype-pollution/basic/merge', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({source:document.getElementById('ppInput').value}) });
+      document.getElementById('ppResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

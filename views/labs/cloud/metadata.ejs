@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-server"></i> IMDS Metadata Crawling</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Exploit the Instance Metadata Service (IMDS) to extract sensitive cloud credentials. Navigate the metadata API paths to find IAM role credentials.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Metadata Explorer</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="metaPath">IMDS Path:</label>
+          <input type="text" id="metaPath" placeholder="/latest/meta-data/" value="/latest/meta-data/">
+        </div>
+        <button class="btn" onclick="crawlMetadata()"><i class="fas fa-folder-open"></i> Browse Path</button>
+      </div>
+      <div id="metaResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# IMDS v1 endpoint:
+curl http://169.254.169.254/latest/meta-data/
+
+# Interesting paths:
+/latest/meta-data/iam/security-credentials/
+/latest/meta-data/hostname
+/latest/meta-data/local-ipv4
+/latest/user-data
+
+# Navigate to IAM credentials path to get the flag
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('cloud-metadata','flagInput_meta','flagResult_meta'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_meta" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_meta" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function crawlMetadata() {
+      const path = document.getElementById('metaPath').value;
+      const resultsDiv = document.getElementById('metaResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Fetching ' + path + '...</p>';
+      try {
+        const res = await fetch('/api/labs/cloud/metadata', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ path }) });
+        const data = await res.json();
+        if (data.content) {
+          let html = '<h4 style="color:var(--primary)">http://169.254.169.254' + path + '</h4>';
+          html += '<div style="font-family:monospace;margin-top:0.5rem;white-space:pre-wrap;color:var(--text);">' + data.content + '</div>';
+          if (data.links) { html += '<div style="margin-top:0.5rem;">'; data.links.forEach(function(l) { html += '<a href="#" onclick="document.getElementById(\'metaPath\').value=\'' + l + '\';crawlMetadata();return false;" style="display:block;color:var(--primary);margin:0.2rem 0;">' + l + '</a>'; }); html += '</div>'; }
+          resultsDiv.innerHTML = html;
+        } else {
+          resultsDiv.innerHTML = '<p style="color:#ff4444">' + (data.error || 'Path not found') + '</p>';
+        }
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

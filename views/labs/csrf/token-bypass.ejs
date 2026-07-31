@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CSRF Token Bypass - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🔄 CSRF Token Bypass</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>This form uses a CSRF token, but the validation is weak. The token is just the username base64-encoded, and the server only checks if ANY token is present, not its value.</p>
+      <p><strong>Token in page:</strong> <code><%= token %></code> (decode it!)</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Protected Action</h2>
+      <div class="vulnerable-form">
+        <label>Action:</label>
+        <input type="text" id="actionInput" value="delete_account" autocomplete="off">
+        <label>CSRF Token:</label>
+        <input type="text" id="tokenInput" value="<%= token %>" autocomplete="off">
+        <button onclick="testToken()" class="btn">Execute Action</button>
+      </div>
+      <div id="tokenResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="hint-box"><i class="fas fa-lightbulb"></i> The server only checks if csrf_token parameter exists. Any value works!</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('csrf-basic', 'flagInput_csrf2', 'flagResult_csrf2'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_csrf2" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_csrf2" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function testToken() {
+      const res = await fetch('/labs/csrf/token-bypass/action', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ csrf_token: document.getElementById('tokenInput').value, action: document.getElementById('actionInput').value })
+      });
+      const data = await res.json();
+      document.getElementById('tokenResult').innerHTML = '<pre>'+JSON.stringify(data,null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

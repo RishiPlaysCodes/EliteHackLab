@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM-Based XSS - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/xss"><i class="fas fa-flask"></i> XSS Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/xss">XSS</a> / DOM-Based</div>
+      <h1>🎭 DOM-Based XSS</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-hard">Hard</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 30 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>This page uses JavaScript to read from the URL hash/fragment and renders it into the DOM. The vulnerability is entirely client-side - the server never sees the payload. Exploit the DOM sink to execute JavaScript.</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Vulnerable Page</h2>
+      <div class="vulnerable-form">
+        <label>Enter your name (uses URL hash):</label>
+        <input type="text" id="nameInput" placeholder="Your name" autocomplete="off">
+        <button onclick="updateName()" class="btn">Update</button>
+      </div>
+      <div id="greeting" class="result-box" style="margin-top:1rem;">
+        <p>Hello, <span id="userNameDisplay">Guest</span>!</p>
+      </div>
+      <div class="code-block">
+// Vulnerable JavaScript (view source):
+var name = decodeURIComponent(window.location.hash.substring(1));
+document.getElementById('userNameDisplay').innerHTML = name;  // DOM Sink!
+
+// Exploit: Navigate to this URL:
+// /labs/xss/dom#&lt;img src=x onerror=alert('XSS')&gt;
+// /labs/xss/dom#&lt;svg onload=alert(document.domain)&gt;
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-code"></i> More DOM Sinks</h2>
+      <div class="vulnerable-form">
+        <label>URL to redirect (open redirect + DOM XSS):</label>
+        <input type="text" id="redirectUrl" placeholder="javascript:alert(1)" autocomplete="off">
+        <button onclick="testRedirect()" class="btn btn-blue">Test Redirect</button>
+      </div>
+      <div id="redirectLink" style="margin-top:1rem;"></div>
+      <div class="code-block">
+// Another DOM sink - document.write
+// Try: ?default=&lt;script&gt;alert(1)&lt;/script&gt;
+
+// eval() sink
+// Try entering: ');alert('XSS');//
+
+// jQuery .html() sink
+// Try: &lt;img src=x onerror=alert(1)&gt;
+      </div>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('xss-dom', 'flagInput_xss_d', 'flagResult_xss_d'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_xss_d" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_xss_d" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    // INTENTIONALLY VULNERABLE - DOM XSS
+    function loadFromHash() {
+      var hash = decodeURIComponent(window.location.hash.substring(1));
+      if (hash) {
+        document.getElementById('userNameDisplay').innerHTML = hash; // VULNERABLE SINK
+      }
+    }
+    loadFromHash();
+    window.addEventListener('hashchange', loadFromHash);
+
+    function updateName() {
+      var name = document.getElementById('nameInput').value;
+      window.location.hash = name;
+      document.getElementById('userNameDisplay').innerHTML = name; // VULNERABLE
+    }
+
+    function testRedirect() {
+      var url = document.getElementById('redirectUrl').value;
+      document.getElementById('redirectLink').innerHTML = '<a href="' + url + '">Click here to go to: ' + url + '</a>'; // VULNERABLE
+    }
+
+    // DOM XSS via document.write
+    var params = new URLSearchParams(window.location.search);
+    var defaultVal = params.get('default');
+    if (defaultVal) {
+      document.write('<div class="result-box">Default value: ' + defaultVal + '</div>'); // VULNERABLE
+    }
+  </script>
+</body>
+</html>

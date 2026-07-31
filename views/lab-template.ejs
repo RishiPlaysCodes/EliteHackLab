@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand">
+      <span class="brand-icon">💀</span>
+      <span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span>
+    </div>
+    <div class="nav-links">
+      <a href="/"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="/scoreboard"><i class="fas fa-trophy"></i> Scoreboard</a>
+    </div>
+  </nav>
+
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb">
+        <a href="/">Home</a> / <a href="<%= backLink %>"><%= category %></a> / <%= title %>
+      </div>
+      <h1><%= icon %> <%= title %></h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-<%= difficulty.toLowerCase() %>"><%= difficulty %></span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> <%= points %> pts</span>
+        <span class="lab-tag category"><%= category %></span>
+      </div>
+    </div>
+
+    <%- content %>
+
+    <!-- Flag Submission -->
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.85rem;">Found the flag? Submit it below!</p>
+      <form onsubmit="submitFlagInline('<%= labId %>', 'flagInput_<%= labId %>', 'flagResult_<%= labId %>'); return false;">
+        <input type="text" id="flagInput_<%= labId %>" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit Flag</button>
+      </form>
+      <div id="flagResult_<%= labId %>" style="display:none; margin-top:1rem;"></div>
+      <button onclick="getHint('<%= labId %>')" class="btn-blue" style="margin-top:0.8rem; padding: 0.4rem 1rem; font-size: 0.8rem; border:none; border-radius: 4px; cursor:pointer; background: rgba(0,212,255,0.2); color: var(--neon-blue);">
+        <i class="fas fa-lightbulb"></i> Get Hint
+      </button>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

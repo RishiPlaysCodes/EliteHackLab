@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Basic SSRF - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/ssrf"><i class="fas fa-flask"></i> SSRF Labs</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🌐 Basic SSRF</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span><span class="lab-tag points"><i class="fas fa-star"></i> 25 pts</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>This URL fetcher lets you preview websites. Abuse it to access internal services that shouldn't be externally accessible.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> URL Fetcher</h2>
+      <div class="vulnerable-form">
+        <label>Enter URL to fetch:</label>
+        <input type="text" id="ssrfUrl" placeholder="https://example.com" autocomplete="off">
+        <button onclick="fetchUrl()" class="btn">Fetch URL</button>
+      </div>
+      <div id="ssrfResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">Target internal endpoints:
+- http://localhost:3000/labs/ssrf/internal/admin
+- http://localhost:3000/labs/ssrf/internal/metadata  
+- http://127.0.0.1:3000/labs/ssrf/internal/admin
+- http://169.254.169.254/latest/meta-data/ (simulated AWS metadata)</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('ssrf-basic','flagInput_ssrf','flagResult_ssrf'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_ssrf" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_ssrf" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function fetchUrl() {
+      const url = document.getElementById('ssrfUrl').value;
+      const res = await fetch('/labs/ssrf/basic/fetch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url}) });
+      const data = await res.json();
+      document.getElementById('ssrfResult').innerHTML = '<pre>'+JSON.stringify(data,null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

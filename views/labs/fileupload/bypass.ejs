@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Extension Bypass - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>📁 Extension Filter Bypass</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The server blocks .php and .jsp extensions. Find an alternative extension that gets executed.</p>
+      <div class="code-block">Bypass extensions: .php5, .phtml, .php.jpg, .htaccess, .svg, .shtml, .php3</div>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-upload"></i> Upload (Extension Filtered)</h2>
+      <form id="bypassForm" enctype="multipart/form-data" class="vulnerable-form">
+        <input type="file" name="file" id="bypassFile"><button type="button" onclick="uploadBypass()" class="btn" style="margin-top:1rem;">Upload</button>
+      </form>
+      <div id="bypassResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('file-upload','flagInput_fu2','flagResult_fu2'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_fu2" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_fu2" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function uploadBypass() {
+      const formData = new FormData(); formData.append('file', document.getElementById('bypassFile').files[0]);
+      const res = await fetch('/labs/file-upload/bypass/upload', { method:'POST', body:formData });
+      document.getElementById('bypassResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

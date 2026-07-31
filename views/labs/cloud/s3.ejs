@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fab fa-aws"></i> S3 Bucket Enumeration</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Enumerate and access misconfigured S3 buckets. Find sensitive data in publicly accessible buckets by guessing common naming patterns.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Bucket Scanner</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="bucketName">S3 Bucket Name:</label>
+          <input type="text" id="bucketName" placeholder="company-backup-prod">
+        </div>
+        <button class="btn" onclick="enumBucket()"><i class="fas fa-search"></i> Enumerate Bucket</button>
+      </div>
+      <div id="s3Results" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Common bucket naming patterns:
+# {company}-backup, {company}-assets, {company}-dev
+# {company}-prod-data, {company}-logs
+
+# AWS CLI commands:
+aws s3 ls s3://bucket-name --no-sign-request
+aws s3 cp s3://bucket-name/file.txt . --no-sign-request
+
+# Try: hacklab-backup, hacklab-secrets, hacklab-dev
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('cloud-s3','flagInput_s3','flagResult_s3'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_s3" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_s3" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function enumBucket() {
+      const bucket = document.getElementById('bucketName').value;
+      const resultsDiv = document.getElementById('s3Results');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Checking s3://' + bucket + '...</p>';
+      try {
+        const res = await fetch('/api/labs/cloud/s3', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ bucket }) });
+        const data = await res.json();
+        if (data.files) {
+          let html = '<h4 style="color:#00ff00">Bucket Found: s3://' + bucket + '/ (Public)</h4>';
+          html += '<div style="font-family:monospace; margin-top:0.5rem;">';
+          data.files.forEach(function(f) { html += '<p style="margin:0.2rem 0;color:var(--text);">' + f + '</p>'; });
+          html += '</div>';
+          if (data.flag) html += '<p style="color:#00ff00;margin-top:1rem;">' + data.flag + '</p>';
+          resultsDiv.innerHTML = html;
+        } else {
+          resultsDiv.innerHTML = '<p style="color:#ff4444">' + (data.error || 'Bucket not found or access denied') + '</p>';
+        }
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

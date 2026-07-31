@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1><i class="fas fa-image"></i> Steganography Challenge</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>A secret message has been hidden inside the file below using steganography. Extract the hidden data to find the flag. Try different extraction techniques.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Steganography Analysis</h2>
+      <div class="vulnerable-form">
+        <div style="margin-bottom:1rem;">
+          <label for="stegoTool">Analysis Tool:</label>
+          <select id="stegoTool">
+            <option value="strings">strings (raw text extraction)</option>
+            <option value="exiftool">exiftool (metadata)</option>
+            <option value="binwalk">binwalk (embedded files)</option>
+            <option value="steghide">steghide extract</option>
+            <option value="lsb">LSB extraction</option>
+          </select>
+        </div>
+        <div style="margin-bottom:1rem;" id="passwordDiv" style="display:none;">
+          <label for="stegoPass">Password (if needed):</label>
+          <input type="text" id="stegoPass" placeholder="passphrase">
+        </div>
+        <button class="btn" onclick="analyzeSteganography()"><i class="fas fa-search"></i> Analyze</button>
+      </div>
+      <div id="stegoResults" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">
+        <h4><i class="fas fa-lightbulb"></i> Hints</h4>
+        <pre>
+# Steganography tools:
+strings image.png            # Look for hidden text
+exiftool image.png           # Check metadata/comments
+binwalk image.png            # Find embedded files
+steghide extract -sf image.png -p password
+zsteg image.png              # PNG LSB analysis
+
+# Common hiding methods:
+# - Appended data after file end
+# - LSB (Least Significant Bit)
+# - EXIF metadata fields
+# - Embedded ZIP files
+        </pre>
+      </div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('forensics-stego','flagInput_stego','flagResult_stego'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_stego" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_stego" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function analyzeSteganography() {
+      const tool = document.getElementById('stegoTool').value;
+      const password = document.getElementById('stegoPass').value;
+      const resultsDiv = document.getElementById('stegoResults');
+      resultsDiv.innerHTML = '<p style="color:var(--primary)"><i class="fas fa-spinner fa-spin"></i> Running ' + tool + '...</p>';
+      try {
+        const res = await fetch('/api/labs/forensics/stego', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ tool, password }) });
+        const data = await res.json();
+        let html = '<h4 style="color:var(--primary)">' + tool + ' output:</h4>';
+        html += '<pre style="color:var(--text);white-space:pre-wrap;">' + (data.output || 'No results') + '</pre>';
+        resultsDiv.innerHTML = html;
+      } catch(e) { resultsDiv.innerHTML = '<p style="color:#ff4444">Error: ' + e.message + '</p>'; }
+    }
+  </script>
+</body>
+</html>

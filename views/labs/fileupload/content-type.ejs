@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Content-Type Bypass - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>📁 Content-Type Bypass</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The server only checks the Content-Type header (must be image/jpeg, image/png, or image/gif). Use Burp Suite or curl to upload a PHP file with a spoofed Content-Type header.</p>
+      <div class="code-block">curl -X POST http://localhost:3000/labs/file-upload/content-type/upload \
+  -F "file=@shell.php;type=image/jpeg"</div>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-upload"></i> Image Upload (Content-Type validated)</h2>
+      <form id="ctForm" enctype="multipart/form-data" class="vulnerable-form">
+        <input type="file" name="file" id="ctFile"><button type="button" onclick="uploadCT()" class="btn" style="margin-top:1rem;">Upload</button>
+      </form>
+      <div id="ctResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="hint-box"><i class="fas fa-lightbulb"></i> Use Burp Suite to intercept and change the Content-Type header to image/jpeg while uploading a .php file</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('file-upload','flagInput_fu3','flagResult_fu3'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_fu3" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_fu3" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function uploadCT() {
+      const formData = new FormData(); formData.append('file', document.getElementById('ctFile').files[0]);
+      const res = await fetch('/labs/file-upload/content-type/upload', { method:'POST', body:formData });
+      document.getElementById('ctResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

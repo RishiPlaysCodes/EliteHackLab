@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>SSRF Labs - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🌐 SSRF Labs</h1></div>
+    <div class="lab-section"><h2><i class="fas fa-book"></i> Theory</h2><p>Server-Side Request Forgery makes the server send HTTP requests to internal resources. This can access cloud metadata (169.254.169.254), internal services, and bypass firewalls.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-flask"></i> Labs</h2><div class="lab-list"><% labs.forEach(function(lab) { %><a href="<%= lab.path %>" class="lab-link"><span class="lab-name"><i class="fas fa-terminal"></i> <%= lab.name %></span><span class="lab-difficulty <%= lab.difficulty.toLowerCase().split('-')[0] %>"><%= lab.difficulty %></span></a><% }); %></div></div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

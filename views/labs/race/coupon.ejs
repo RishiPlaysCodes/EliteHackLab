@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>⚡ Coupon Reuse via Race</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Redeem coupon code DISCOUNT50 multiple times by sending concurrent requests before the "used" flag is set.</p></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Coupon System</h2>
+      <div class="vulnerable-form">
+        <label>Coupon Code:</label><input type="text" id="couponCode" value="DISCOUNT50">
+        <label>Concurrent Redemptions:</label><input type="number" id="couponCount" value="5" min="2" max="10">
+        <button onclick="raceCoupon()" class="btn btn-danger">⚡ Race Redeem</button>
+      </div>
+      <div id="couponResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('race-condition','flagInput_rc2','flagResult_rc2'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_rc2" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_rc2" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function raceCoupon(){const n=document.getElementById('couponCount').value;const code=document.getElementById('couponCode').value;const p=[];for(let i=0;i<n;i++)p.push(fetch('/labs/race-condition/coupon/redeem',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})}));const results=await Promise.all(p);const data=await Promise.all(results.map(r=>r.json()));document.getElementById('couponResult').innerHTML='<pre>'+JSON.stringify(data,null,2)+'</pre>';}
+  </script>
+</body>
+</html>

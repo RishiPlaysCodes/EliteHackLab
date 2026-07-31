@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Blind SSRF - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🌐 Blind SSRF</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>This endpoint sends notifications to a webhook URL. You don't see the response. Use a webhook catcher (like webhook.site) to confirm SSRF, or point to internal services.</p>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Webhook Notification</h2>
+      <div class="vulnerable-form">
+        <label>Webhook URL for notifications:</label>
+        <input type="text" id="webhookUrl" placeholder="http://localhost:3000/labs/ssrf/internal/admin" autocomplete="off">
+        <button onclick="sendWebhook()" class="btn">Send Notification</button>
+      </div>
+      <div id="webhookResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('ssrf-basic','flagInput_ssrf3','flagResult_ssrf3'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_ssrf3" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_ssrf3" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function sendWebhook() {
+      const res = await fetch('/labs/ssrf/blind/webhook', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({webhook_url:document.getElementById('webhookUrl').value}) });
+      document.getElementById('webhookResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

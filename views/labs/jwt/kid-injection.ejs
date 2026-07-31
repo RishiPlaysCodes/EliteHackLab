@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>KID Injection - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🎫 KID Header Injection</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span><span class="lab-tag points"><i class="fas fa-star"></i> 25 pts</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The server uses the KID (Key ID) header to locate the signing key. Inject a path traversal or empty value to sign with a known/empty key.</p>
+      <div class="code-block" style="word-break:break-all;">Token: <%= token %>
+
+Attack: Modify header to:
+{"alg":"HS256","kid":"../../../dev/null"}  // Sign with empty string
+{"alg":"HS256","kid":""}  // Empty KID
+Then sign payload {role:"admin"} with empty string as key</div>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Verify Token</h2>
+      <div class="vulnerable-form">
+        <textarea id="kidToken" rows="3" placeholder="Forged token with injected KID..."></textarea>
+        <button onclick="verifyKid()" class="btn">Verify</button>
+      </div>
+      <div id="kidResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('jwt-weak-secret','flagInput_kid','flagResult_kid'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_kid" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_kid" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function verifyKid() {
+      const res = await fetch('/labs/jwt/kid-injection/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token:document.getElementById('kidToken').value.trim()}) });
+      document.getElementById('kidResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>

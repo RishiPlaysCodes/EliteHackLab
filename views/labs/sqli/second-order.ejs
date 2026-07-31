@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Second-Order SQLi - EliteHackLab</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav">
+    <div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div>
+    <div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/sqli"><i class="fas fa-flask"></i> SQLi Labs</a></div>
+  </nav>
+  <div class="lab-container">
+    <div class="lab-header">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/labs/sqli">SQL Injection</a> / Second-Order</div>
+      <h1>💉 Second-Order SQL Injection</h1>
+      <div class="lab-info">
+        <span class="lab-tag difficulty-hard">Hard</span>
+        <span class="lab-tag points"><i class="fas fa-star"></i> 25 pts</span>
+      </div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>In second-order SQL injection, the malicious payload is stored safely but gets used unsafely in a later query. Register a user with a malicious username, then trigger the injection when viewing the profile.</p>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-user-plus"></i> Step 1: Register User</h2>
+      <div class="vulnerable-form">
+        <label>Username (inject here):</label>
+        <input type="text" id="regUsername" placeholder="admin' OR '1'='1' --" autocomplete="off">
+        <label>Password:</label>
+        <input type="password" id="regPassword" value="anything" autocomplete="off">
+        <button onclick="registerUser()" class="btn">Register</button>
+      </div>
+      <div id="regResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-user"></i> Step 2: View Profile (triggers injection)</h2>
+      <div class="vulnerable-form">
+        <label>Username to view:</label>
+        <input type="text" id="viewUsername" placeholder="Enter the username you registered" autocomplete="off">
+        <button onclick="viewProfile()" class="btn btn-blue">View Profile</button>
+      </div>
+      <div id="profileResult" class="result-box" style="margin-top:1rem;"></div>
+    </div>
+
+    <div class="lab-section">
+      <h2><i class="fas fa-lightbulb"></i> How It Works</h2>
+      <div class="code-block">
+Step 1 - Registration (parameterized, safe):
+INSERT INTO users (username, password) VALUES (?, ?)
+→ Stores "admin' OR '1'='1' --" safely
+
+Step 2 - Profile View (vulnerable):
+user = SELECT * FROM users WHERE username = ?  // Safe lookup
+messages = SELECT * FROM messages WHERE sender_id = 
+  (SELECT id FROM users WHERE username = '${user.username}')  // VULNERABLE!
+
+The stored username is used in a new query without sanitization!
+      </div>
+    </div>
+
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('sqli-blind', 'flagInput_so', 'flagResult_so'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;">
+        <input type="text" id="flagInput_so" placeholder="FLAG{...}" autocomplete="off">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+      <div id="flagResult_so" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function registerUser() {
+      const username = document.getElementById('regUsername').value;
+      const password = document.getElementById('regPassword').value;
+      const res = await fetch('/labs/sqli/second-order/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      document.getElementById('regResult').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+    async function viewProfile() {
+      const username = document.getElementById('viewUsername').value;
+      const res = await fetch(`/labs/sqli/second-order/profile?username=${encodeURIComponent(username)}`);
+      const data = await res.json();
+      document.getElementById('profileResult').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+  </script>
+</body>
+</html>

