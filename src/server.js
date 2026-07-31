@@ -88,6 +88,8 @@ const apiRoutes = require('./routes/api');
 const websocketRoutes = require('./routes/websocket');
 const advancedRoutes = require('./routes/advanced');
 const flagRoutes = require('./routes/flags');
+const labApiRoutes = require('./routes/labApi');
+const FLAGS = require('../db/flags');
 
 // Register routes
 app.use('/', dashboardRoutes);
@@ -117,21 +119,29 @@ app.use('/labs/api', apiRoutes);
 app.use('/labs/websocket', websocketRoutes);
 app.use('/labs/advanced', advancedRoutes);
 app.use('/api/flags', flagRoutes);
+app.use('/api/labs', labApiRoutes);
 
 // WebSocket handler (intentionally vulnerable)
 wss.on('connection', (ws, req) => {
   console.log('WebSocket client connected');
   
   ws.on('message', (message) => {
-    const data = JSON.parse(message.toString());
-    
-    // No authentication check - vulnerable
+    // Guard against non-JSON payloads so a malformed frame can't crash the server
+    let data;
+    try {
+      data = JSON.parse(message.toString());
+    } catch (e) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Invalid JSON' }));
+      return;
+    }
+
+    // No authentication check - vulnerable (intentional for the lab)
     if (data.type === 'admin_command') {
       // Command execution without auth
       ws.send(JSON.stringify({
         type: 'response',
         data: `Executed: ${data.command}`,
-        flag: 'FLAG{websocket_hijacked}'
+        flag: FLAGS['websocket-attack'].flag
       }));
     } else if (data.type === 'chat') {
       // Broadcast to all clients (no sanitization)

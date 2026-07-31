@@ -145,7 +145,7 @@ const products = [
   { name: 'Secret Admin Panel Access', description: 'DO NOT DISPLAY - Internal use only', price: 0, category: 'internal', stock: 1, hidden: 1 },
   { name: 'Pentesting Laptop', description: 'Pre-configured with Kali Linux', price: 1499.99, category: 'hardware', stock: 10, hidden: 0 },
   { name: 'CTF Toolkit Pro', description: 'Professional CTF tools bundle', price: 299.99, category: 'software', stock: 999, hidden: 0 },
-  { name: 'FLAG{sql_injection_master}', description: 'Hidden product - you found it!', price: 0, category: 'flags', stock: 1, hidden: 1 },
+  { name: 'FLAG{sql_injection_101}', description: 'Hidden product - you found it!', price: 0, category: 'flags', stock: 1, hidden: 1 },
 ];
 
 const insertProduct = db.prepare('INSERT OR IGNORE INTO products (name, description, price, category, stock, hidden) VALUES (?, ?, ?, ?, ?, ?)');
@@ -179,49 +179,16 @@ secrets.forEach(s => {
   insertSecret.run(s.owner, s.title, s.content, s.classification);
 });
 
-// Insert CTF Flags
-const flags = [
-  { lab_id: 'sqli-basic', flag: 'FLAG{sql_injection_101}', difficulty: 'easy', points: 10, hint: 'Try single quotes' },
-  { lab_id: 'sqli-blind', flag: 'FLAG{blind_sqli_master}', difficulty: 'medium', points: 25, hint: 'Time-based or boolean-based' },
-  { lab_id: 'sqli-union', flag: 'FLAG{union_select_pro}', difficulty: 'medium', points: 20, hint: 'How many columns?' },
-  { lab_id: 'xss-reflected', flag: 'FLAG{xss_reflected_pwned}', difficulty: 'easy', points: 10, hint: 'Check the search parameter' },
-  { lab_id: 'xss-stored', flag: 'FLAG{xss_stored_persistent}', difficulty: 'medium', points: 20, hint: 'Comments are dangerous' },
-  { lab_id: 'xss-dom', flag: 'FLAG{dom_xss_ninja}', difficulty: 'hard', points: 30, hint: 'Check client-side rendering' },
-  { lab_id: 'csrf-basic', flag: 'FLAG{csrf_token_missing}', difficulty: 'easy', points: 10, hint: 'No token validation' },
-  { lab_id: 'ssrf-basic', flag: 'FLAG{ssrf_internal_access}', difficulty: 'medium', points: 25, hint: 'Try internal URLs' },
-  { lab_id: 'file-upload', flag: 'FLAG{unrestricted_upload}', difficulty: 'easy', points: 15, hint: 'What file types are allowed?' },
-  { lab_id: 'cmd-injection', flag: 'FLAG{command_injection_rce}', difficulty: 'medium', points: 25, hint: 'Semicolons and pipes' },
-  { lab_id: 'idor-basic', flag: 'FLAG{idor_champion}', difficulty: 'easy', points: 10, hint: 'Change the ID' },
-  { lab_id: 'jwt-none', flag: 'FLAG{jwt_algorithm_none}', difficulty: 'medium', points: 20, hint: 'Algorithm confusion' },
-  { lab_id: 'jwt-weak-secret', flag: 'FLAG{jwt_weak_secret_cracked}', difficulty: 'medium', points: 25, hint: 'Brute force the secret' },
-  { lab_id: 'xxe-basic', flag: 'FLAG{xxe_file_disclosure}', difficulty: 'hard', points: 30, hint: 'External entities' },
-  { lab_id: 'ssti-basic', flag: 'FLAG{ssti_template_rce}', difficulty: 'hard', points: 35, hint: 'Template expressions' },
-  { lab_id: 'deserialization', flag: 'FLAG{insecure_deserialize}', difficulty: 'hard', points: 35, hint: 'Object injection' },
-  { lab_id: 'prototype-pollution', flag: 'FLAG{prototype_polluted}', difficulty: 'hard', points: 40, hint: '__proto__ manipulation' },
-  { lab_id: 'race-condition', flag: 'FLAG{race_condition_won}', difficulty: 'hard', points: 35, hint: 'Send multiple requests simultaneously' },
-  { lab_id: 'websocket-attack', flag: 'FLAG{websocket_hijacked}', difficulty: 'hard', points: 30, hint: 'No origin check' },
-  { lab_id: 'path-traversal', flag: 'FLAG{path_traversal_lfi}', difficulty: 'medium', points: 20, hint: '../../../etc/passwd' },
-  { lab_id: 'brute-force', flag: 'FLAG{brute_force_success}', difficulty: 'easy', points: 10, hint: 'Common passwords' },
-  { lab_id: 'session-fixation', flag: 'FLAG{session_fixed}', difficulty: 'medium', points: 20, hint: 'Set session before auth' },
-  { lab_id: 'clickjacking', flag: 'FLAG{clickjacked}', difficulty: 'easy', points: 10, hint: 'X-Frame-Options missing' },
-  { lab_id: 'cors-misconfig', flag: 'FLAG{cors_wide_open}', difficulty: 'medium', points: 20, hint: 'Origin: null' },
-  { lab_id: 'open-redirect', flag: 'FLAG{open_redirect_phish}', difficulty: 'easy', points: 10, hint: 'Redirect parameter' },
-  { lab_id: 'crypto-weak-hash', flag: 'FLAG{md5_is_broken}', difficulty: 'easy', points: 10, hint: 'Rainbow tables' },
-  { lab_id: 'crypto-ecb-mode', flag: 'FLAG{ecb_penguin}', difficulty: 'medium', points: 20, hint: 'Block patterns' },
-  { lab_id: 'crypto-padding-oracle', flag: 'FLAG{padding_oracle_decrypted}', difficulty: 'hard', points: 40, hint: 'Error messages differ' },
-  { lab_id: 'privesc-suid', flag: 'FLAG{suid_root_shell}', difficulty: 'medium', points: 25, hint: 'Find SUID binaries' },
-  { lab_id: 'privesc-cron', flag: 'FLAG{cron_job_hijacked}', difficulty: 'medium', points: 25, hint: 'Writable cron scripts' },
-  { lab_id: 'cloud-s3-open', flag: 'FLAG{s3_bucket_exposed}', difficulty: 'easy', points: 15, hint: 'Public bucket listing' },
-  { lab_id: 'cloud-metadata', flag: 'FLAG{imds_token_stolen}', difficulty: 'medium', points: 25, hint: '169.254.169.254' },
-  { lab_id: 'forensics-stego', flag: 'FLAG{hidden_in_pixels}', difficulty: 'medium', points: 20, hint: 'LSB encoding' },
-  { lab_id: 'forensics-memory', flag: 'FLAG{memory_dump_analyzed}', difficulty: 'hard', points: 35, hint: 'Process listing' },
-  { lab_id: 'social-phishing', flag: 'FLAG{phishing_detected}', difficulty: 'easy', points: 10, hint: 'Check the URL carefully' },
-  { lab_id: 'api-mass-assignment', flag: 'FLAG{mass_assignment_admin}', difficulty: 'medium', points: 20, hint: 'Extra parameters in POST' },
-  { lab_id: 'api-rate-limit', flag: 'FLAG{no_rate_limit}', difficulty: 'easy', points: 10, hint: 'Send many requests' },
-  { lab_id: 'graphql-introspection', flag: 'FLAG{graphql_exposed}', difficulty: 'medium', points: 20, hint: '__schema query' },
-  { lab_id: 'nosql-injection', flag: 'FLAG{nosql_bypassed}', difficulty: 'medium', points: 25, hint: '$ne operator' },
-  { lab_id: 'http-smuggling', flag: 'FLAG{request_smuggled}', difficulty: 'hard', points: 40, hint: 'CL.TE or TE.CL' },
-];
+// Insert CTF Flags — sourced from the single canonical registry (db/flags.js)
+// so the flag stored in the DB always matches the flag revealed by each lab.
+const FLAG_REGISTRY = require('./flags');
+const flags = Object.keys(FLAG_REGISTRY).map(labId => ({
+  lab_id: labId,
+  flag: FLAG_REGISTRY[labId].flag,
+  difficulty: FLAG_REGISTRY[labId].difficulty,
+  points: FLAG_REGISTRY[labId].points,
+  hint: FLAG_REGISTRY[labId].hint
+}));
 
 const insertFlag = db.prepare('INSERT OR IGNORE INTO flags (lab_id, flag, difficulty, points, hint) VALUES (?, ?, ?, ?, ?)');
 flags.forEach(f => {

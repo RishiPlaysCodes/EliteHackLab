@@ -14,36 +14,37 @@ router.get('/', (req, res) => {
   });
 });
 
-// Simulated Linux system
+// Simulated Linux system. NOTE: the lab views render these arrays as plain
+// strings (<%= item %>), so every entry here must be a string, not an object.
 const systemInfo = {
   currentUser: 'www-data',
-  kernel: 'Linux 4.15.0-generic #1 SMP x86_64',
+  kernel: 'Linux 3.13.0-24-generic #46-Ubuntu SMP x86_64',
+  os: 'Ubuntu 14.04.1 LTS',
+  arch: 'x86_64',
   suidBinaries: [
-    { path: '/usr/bin/passwd', owner: 'root', exploitable: false },
-    { path: '/usr/bin/sudo', owner: 'root', exploitable: false },
-    { path: '/usr/local/bin/backup', owner: 'root', exploitable: true, note: 'Custom script - runs tar with user input' },
-    { path: '/opt/statuscheck', owner: 'root', exploitable: true, note: 'Calls system("cat /var/log/status") - relative path!' },
-    { path: '/usr/bin/find', owner: 'root', exploitable: true, note: 'find with -exec - GTFOBins!' },
-    { path: '/usr/bin/vim', owner: 'root', exploitable: true, note: 'vim → :!sh → root shell' },
-    { path: '/usr/bin/python3', owner: 'root', exploitable: true, note: 'python3 -c "import os; os.system(\'/bin/sh\')"' },
+    '-rwsr-xr-x 1 root root  /usr/bin/passwd      (not exploitable)',
+    '-rwsr-xr-x 1 root root  /usr/bin/sudo        (not exploitable)',
+    '-rwsr-xr-x 1 root root  /usr/bin/find        (GTFOBins: find . -exec /bin/sh -p \\;)',
+    '-rwsr-xr-x 1 root root  /usr/bin/vim         (GTFOBins: vim -c ":!/bin/sh")',
+    '-rwsr-xr-x 1 root root  /usr/bin/python3     (python3 -c \'import os;os.execl("/bin/sh","sh","-p")\')',
+    '-rwsr-xr-x 1 root root  /opt/statuscheck     (calls "cat" with a relative path - PATH hijack!)',
   ],
   cronJobs: [
-    { schedule: '* * * * *', command: '/opt/scripts/cleanup.sh', owner: 'root', writable: true },
-    { schedule: '*/5 * * * *', command: '/opt/scripts/backup.sh', owner: 'root', writable: false },
-    { schedule: '0 * * * *', command: '/tmp/monitor.py', owner: 'root', writable: true, note: '/tmp is world-writable!' },
+    '* * * * *   root  /opt/scripts/cleanup.sh    (WORLD-WRITABLE!)',
+    '*/5 * * * * root  /opt/scripts/backup.sh     (root-owned, not writable)',
+    '0 * * * *   root  /tmp/monitor.py            (/tmp is world-writable!)',
   ],
   sudoConfig: [
-    '(ALL) NOPASSWD: /usr/bin/vim',
-    '(ALL) NOPASSWD: /usr/bin/find',
-    '(ALL) NOPASSWD: /usr/bin/awk',
-    '(ALL) NOPASSWD: /usr/bin/env',
-    '(ALL) NOPASSWD: /opt/scripts/restart_service.sh',
+    'User www-data may run the following commands:',
+    '  (ALL) NOPASSWD: /usr/bin/vim',
+    '  (ALL) NOPASSWD: /usr/bin/find',
+    '  (ALL) NOPASSWD: /usr/bin/awk',
+    '  (ALL) NOPASSWD: /usr/bin/env',
   ],
   writableFiles: [
     '/opt/scripts/cleanup.sh',
     '/tmp/monitor.py',
     '/etc/cron.d/webapp',
-    '/home/admin/.bashrc',
   ]
 };
 
